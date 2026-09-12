@@ -577,6 +577,192 @@
     .motto-main { font-size: 23px; }
     .clk-time svg { height: 46px; }
   }
+/* ===== 主页模块衔接优化（接缝式节奏） =====
+   衔接语言借鉴：imsyy/home（MIT License · 内容直接在背景上呼吸、大间距分组）、
+   moewah.com（hairline 细线分隔与档案编号）、WangHaHa 博客导航页（节标题内嵌横线，分隔线作接缝）。
+   仅作用于主页：section 去盒化 + SEC 编号接缝线 + 节奏间距 + 卡片边缘柔化。 */
+  #page-home .section { background: transparent; border: none; border-radius: 0; padding: 0; margin-top: 0; }
+  #page-home .home-main > .section + .section { margin-top: 76px; }
+  #page-home .home-grid { margin-top: 64px; }
+  #page-home .sec-head { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+  #page-home .sec-head::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, rgba(139,123,255,.45), transparent 85%); }
+  body.light #page-home .sec-head::after { background: linear-gradient(90deg, rgba(90,75,214,.35), transparent 85%); }
+  #page-home .section > h2 { margin-bottom: 8px; }
+  #page-home .sec-sub { margin: 0 0 18px; }
+  #page-home .toc-list { margin-top: 16px; }
+  #page-home .toc-item, #page-home .record-bar, #page-home .info-card, #page-home .intro-card, #page-home .chat-box {
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 12px 28px rgba(0,0,0,.22);
+  }
+  body.light #page-home .toc-item, body.light #page-home .record-bar, body.light #page-home .info-card, body.light #page-home .intro-card, body.light #page-home .chat-box {
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.55), 0 10px 24px rgba(30,40,60,.10);
+  }
+  #page-home .arc-end { display: flex; align-items: center; gap: 16px; margin: 80px 0 4px; }
+  #page-home .arc-end::before, #page-home .arc-end::after { content: ""; flex: 1; height: 1px; }
+  #page-home .arc-end::before { background: linear-gradient(90deg, transparent, rgba(139,123,255,.4)); }
+  #page-home .arc-end::after { background: linear-gradient(90deg, rgba(139,123,255,.4), transparent); }
+  body.light #page-home .arc-end::before { background: linear-gradient(90deg, transparent, rgba(90,75,214,.32)); }
+  body.light #page-home .arc-end::after { background: linear-gradient(90deg, rgba(90,75,214,.32), transparent); }
+  @media (max-width: 560px) {
+    #page-home .home-grid { margin-top: 44px; }
+    #page-home .home-main > .section + .section { margin-top: 56px; }
+    #page-home .arc-end { margin-top: 60px; }
+  }
+/* ===== 主页衔接 v2：间距收紧 + 白天模式模块可见性修复 =====
+   内卡片改用主题变量 color-mix 磨砂玻璃面（与侧栏卡片同语言），
+   避免白天模式「背景提亮 + 卡片近透明」导致的边界消失。 */
+  #page-home .home-main > .section + .section { margin-top: 56px; }
+  #page-home .home-grid { margin-top: 48px; }
+  #page-home .arc-end { margin-top: 64px; }
+  #page-home .toc-item, #page-home .record-bar, #page-home .info-card, #page-home .intro-card {
+    background: color-mix(in srgb, var(--card-2) 60%, transparent);
+    border-color: var(--line);
+    backdrop-filter: blur(12px) saturate(1.15);
+    -webkit-backdrop-filter: blur(12px) saturate(1.15);
+  }
+  body.light #page-home .toc-item, body.light #page-home .record-bar, body.light #page-home .info-card, body.light #page-home .intro-card {
+    background: color-mix(in srgb, var(--card) 74%, transparent);
+    border-color: rgba(30,40,60,.16);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.6), 0 10px 26px rgba(30,40,60,.14);
+  }
+  body.light #page-home .chat-box { box-shadow: inset 0 1px 0 rgba(255,255,255,.6), 0 10px 26px rgba(30,40,60,.12); }
+  body.light #page-home .sec-head::after { background: linear-gradient(90deg, rgba(90,75,214,.5), transparent 85%); }
+  @media (max-width: 560px) {
+    #page-home .home-grid { margin-top: 34px; }
+    #page-home .home-main > .section + .section { margin-top: 42px; }
+    #page-home .arc-end { margin-top: 48px; }
+  }
+/* ===== 主页衔接 v3：间距再收紧 + 侧栏卡片更通透 ===== */
+  #page-home .home-grid { margin-top: 28px; }
+  #page-home .home-main > .section + .section { margin-top: 40px; }
+  #page-home .arc-end { margin-top: 48px; }
+  .side-card { background: color-mix(in srgb, var(--card) 44%, transparent); }
+  @media (max-width: 560px) {
+    #page-home .home-grid { margin-top: 22px; }
+    #page-home .home-main > .section + .section { margin-top: 30px; }
+    #page-home .arc-end { margin-top: 36px; }
+  }
+/* ===== 主页首屏留白（参考 moewah.com 的首屏呼吸感）：拉开导航与 hero 卡片的间距 ===== */
+  #page-home { padding-top: 52px; }
+  @media (max-width: 560px) { #page-home { padding-top: 22px; } }
+/* ===== 主页 hero 重构：档案大字版式 =====
+   版式参考 moewah.com 个人档案主页（仅借鉴排版创意，原创 CSS 重写，未复制其代码/素材）。 */
+  #page-home { position: relative; }
+  #page-home .arc-hero { background: none; border: none; border-radius: 0; padding: 4px 0 0; overflow: visible;
+    display: flex; flex-wrap: wrap; align-items: flex-end; row-gap: 0; column-gap: 44px; }
+  #page-home .arc-hero .lamp-wrap { width: 100%; }
+  #page-home .arc-meta { width: 100%; border: none; background: none; padding: 0; }
+  #page-home .arc-online { border: 1px solid var(--line); border-radius: 4px; padding: 6px 14px;
+    background: color-mix(in srgb, var(--card) 55%, transparent); }
+  #page-home .arc-file { width: 100%; margin-top: 36px; }
+  #page-home .arc-main { flex: 1 1 380px; min-width: 0; margin-top: 8px; }
+  #page-home .arc-main .avatar { display: none; }
+  #page-home .hero-info { display: flex; flex-direction: column; align-items: flex-start; }
+  #page-home .hero-info h1 { order: 1; font-size: clamp(58px, 13vw, 148px); line-height: .95; letter-spacing: -.02em; font-weight: 800; }
+  #page-home .hero-info .arc-slogan { order: 2; margin-top: 18px; font-size: 15px; letter-spacing: .3em; }
+  #page-home .hero-info .badges { order: 3; margin-top: 20px; }
+  #page-home .badge { border-radius: 4px; }
+  #page-home .spec { flex: 1 1 336px; max-width: 430px; min-width: 0; margin-top: 30px; position: relative;
+    border-radius: 4px; overflow: visible;
+    background: color-mix(in srgb, var(--card) 45%, transparent);
+    backdrop-filter: blur(10px) saturate(1.12); -webkit-backdrop-filter: blur(10px) saturate(1.12); }
+  #page-home .spec::before { content: "SPEC"; position: absolute; top: -13px; right: 22px; z-index: 1;
+    padding: 3px 12px; font-family: Consolas, "Courier New", monospace; font-size: 12px; letter-spacing: 3px;
+    color: var(--accent); background: var(--bg); border: 1px solid var(--line); border-radius: 3px; }
+  #page-home .spec-domain { display: none; }
+  #page-home .spec-body { display: grid; grid-template-columns: 1fr auto; gap: 0 14px; }
+  #page-home .spec-photo { grid-column: 2; grid-row: 1; width: 74px; }
+  #page-home .spec-photo svg { width: 74px; height: 74px; }
+  #page-home .spec-rows { grid-column: 1 / -1; grid-row: 2; grid-template-columns: 1fr; min-width: 0; margin-top: 12px; }
+  @media (min-width: 1201px) {
+    #page-home::before { content: "PERSONAL ARCHIVE · NO. LJX-2026-001"; position: absolute; left: -54px; top: 150px;
+      writing-mode: vertical-rl; letter-spacing: 3px; font-size: 11px; color: var(--muted);
+      font-family: Consolas, "Courier New", monospace; border-right: 1px solid var(--line); padding-right: 14px; }
+  }
+  @media (max-width: 560px) {
+    #page-home .spec { flex-basis: 100%; max-width: none; }
+  }
+/* ===== SPEC 面板不透明化（用户偏好：档案摘要底板不透明更清晰） ===== */
+  #page-home .spec { background: var(--card); backdrop-filter: none; -webkit-backdrop-filter: none; }
+/* ===== hero 大底板（用户参考旧版盒式 hero：整块首屏放进圆角底板卡，内容版式不变） ===== */
+  #page-home .arc-hero { background: var(--card); border: 1px solid var(--line); border-radius: 24px;
+    padding: 34px 40px 40px; box-shadow: 0 18px 44px rgba(0,0,0,.35); }
+  body.light #page-home .arc-hero { box-shadow: 0 18px 44px rgba(30,40,60,.16); }
+  /* SPEC 文件夹标签底色跟随底板（原 var(--bg) 会在卡片上露出异色） */
+  #page-home .spec::before { background: var(--card); }
+  @media (max-width: 560px) {
+    #page-home .arc-hero { padding: 22px 20px 26px; border-radius: 18px; }
+  }
+/* ===== SPEC 面板与大底板拉开层次（用户反馈：面板与底板同为纯色显平） ===== */
+  #page-home .spec { background: var(--card-2); box-shadow: 0 12px 30px rgba(0,0,0,.32); }
+  body.light #page-home .spec { box-shadow: 0 10px 26px rgba(30,40,60,.12), inset 0 1px 0 rgba(255,255,255,.65); }
+  /* 页签与面板同色、下边开口：连成一体的档案夹页签 */
+  #page-home .spec::before { background: var(--card-2); border-bottom: none; border-radius: 3px 3px 0 0; }
+
+/* ===== 管理扩展：档案照片 img 适配 + 问答管理列表行 ===== */
+  #page-home .spec-photo img { width: 74px; height: 74px; object-fit: cover; border-radius: 8px; border: 1px solid var(--line); display: block; }
+  .qa-row { display: flex; align-items: flex-start; gap: 12px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--card); margin-top: 8px; }
+  .qa-row .qa-txt { font-size: 13.5px; line-height: 1.6; min-width: 0; word-break: break-word; }
+/* ===== 登记卡补齐：联系地址卡占满第二行剩余格（用户指出的空白区） ===== */
+  #infoGrid .info-card:last-child { grid-column: span 2; }
+/* ===== 主页副页摘要板块（SEC.03-06 · 数字分身下方） ===== */
+  .pv-list { display: flex; flex-direction: column; margin-top: 4px; }
+  .pv-row { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding: 11px 2px; border-bottom: 1px dashed var(--line); color: inherit; text-decoration: none; }
+  .pv-row:last-child { border-bottom: none; }
+  .pv-row .pv-k { font-size: 14.5px; min-width: 0; overflow: hidden; }
+  .pv-row .pv-v { color: var(--muted); font-size: 12.5px; flex-shrink: 0; max-width: 55%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pv-row.lnk { transition: .15s; }
+  .pv-row.lnk:hover .pv-k { color: #8b7bff; }
+  .pv-mo { align-items: flex-start; }
+  .pv-mtxt { line-height: 1.65; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  .pv-title { color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 10px; cursor: pointer; transition: .15s; padding: 8px 16px; border: 1px solid var(--line); border-radius: 10px; background: rgba(255,255,255,.02); }
+  body.light .pv-title { background: rgba(20,26,38,.03); }
+  .pv-title .pv-go { opacity: .45; color: var(--muted); transition: .2s; font-size: .8em; font-weight: 400; }
+  .pv-title:hover { border-color: #8b7bff; transform: translateY(-2px); color: inherit; }
+  .pv-title:hover .pv-go { opacity: 1; color: #8b7bff; transform: translateX(2px); }
+/* ===== 数字分身聊天框压短（用户要求稍微短一点） ===== */
+  #page-home .chat-box { height: 320px; }
+/* ===== 档案徽章流星效果（参考 Aceternity UI Meteors · 原生 CSS 重写） ===== */
+  #page-home .badge { position: relative; overflow: hidden; isolation: isolate; }
+  .badge .bt { position: relative; z-index: 1; }
+  .pill-meteor { position: absolute; top: 0; width: 2px; height: 2px; border-radius: 50%; background: rgba(255,255,255,.9); box-shadow: 0 0 5px 1px rgba(255,255,255,.65), 0 0 10px 2px rgba(180,190,255,.28); transform: rotate(215deg); animation: pillMeteor linear infinite; pointer-events: none; z-index: 0; }
+  .pill-meteor::before { content: ""; position: absolute; top: 50%; transform: translateY(-50%); width: 44px; height: 1.5px; background: linear-gradient(90deg, rgba(255,255,255,.7), rgba(148,163,184,.28) 55%, transparent); }
+  @keyframes pillMeteor {
+    0% { transform: rotate(215deg) translateX(0); opacity: 0; }
+    12% { opacity: 1; }
+    70% { opacity: 1; }
+    100% { transform: rotate(215deg) translateX(-220px); opacity: 0; }
+  }
+  body.light .pill-meteor { background: rgba(100,116,139,.85); box-shadow: 0 0 4px 1px rgba(100,116,139,.6); }
+  body.light .pill-meteor::before { background: linear-gradient(90deg, rgba(100,116,139,.65), rgba(100,116,139,.25) 55%, transparent); }
+/* ===== 粒子背景画布（背景图之上、内容之下） ===== */
+  #fxLayer { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
+/* ===== 左侧页边粒子调节球（360 加速球式吸附，悬停展开） ===== */
+  #fxDock { position: fixed; left: 0; top: 50%; transform: translateY(-50%); z-index: 45; display: flex; align-items: center; gap: 10px; }
+  .fxd-ball { width: 56px; height: 56px; border-radius: 50%; background: var(--card); border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; font-size: 22px; cursor: grab; transform: none; opacity: .8; transition: transform .28s ease, opacity .28s; box-shadow: 4px 6px 18px rgba(0,0,0,.25); }
+  .fxd-panel { width: 236px; max-height: min(200px, 40vh); overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--line) transparent; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 12px; opacity: 0; transform: translateX(-18px); pointer-events: none; transition: .28s ease; box-shadow: 0 14px 34px rgba(0,0,0,.32); }
+  .fxd-panel::-webkit-scrollbar { width: 6px; }
+  .fxd-panel::-webkit-scrollbar-thumb { background: var(--line); border-radius: 3px; }
+  .fxd-panel::-webkit-scrollbar-track { background: transparent; }
+  #fxDock:hover .fxd-ball, #fxDock.open .fxd-ball { opacity: 1; }
+  #fxDock:hover .fxd-panel, #fxDock.open .fxd-panel { opacity: 1; transform: translateX(0); pointer-events: auto; }
+  .fxd-ball:active { cursor: grabbing; }
+  #fxDock.fxd-flip { flex-direction: row-reverse; }
+  #fxDock.fxd-edge-l .fxd-ball { transform: translateX(-38px); }
+  #fxDock.fxd-edge-r .fxd-ball { transform: translateX(38px); }
+  #fxDock.fxd-edge-l:hover .fxd-ball, #fxDock.fxd-edge-l.open .fxd-ball { transform: translateX(10px); }
+  #fxDock.fxd-edge-r:hover .fxd-ball, #fxDock.fxd-edge-r.open .fxd-ball { transform: translateX(-10px); }
+  #fxDock.fxd-drag .fxd-ball { transform: none !important; }
+  .fxd-title { font-size: 11px; letter-spacing: 1.5px; color: var(--muted); margin-bottom: 6px; }
+  .fxd-status { font-size: 12.5px; margin-bottom: 8px; }
+  .fxd-auto { display: flex; gap: 6px; align-items: center; font-size: 12.5px; color: var(--muted); margin-bottom: 10px; cursor: pointer; }
+  .fxd-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .fxd-btn { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 7px 2px; background: var(--card-2); border: 1px solid var(--line); border-radius: 9px; color: var(--text); font-size: 11.5px; cursor: pointer; font-family: inherit; }
+  .fxd-btn:hover { border-color: var(--accent); }
+  .fxd-btn .i { font-size: 15px; line-height: 1.2; }
+  .fxd-btn .w { font-size: 9.5px; color: var(--muted); }
+  .fxd-stop { margin-top: 10px; width: 100%; padding: 7px; background: var(--card-2); border: 1px solid var(--line); border-radius: 9px; color: var(--muted); font-size: 12.5px; cursor: pointer; font-family: inherit; }
+  .fxd-stop:hover { color: var(--danger); border-color: var(--danger); }
+  @media (max-width: 640px) { .fxd-panel { width: 200px; } }
 </style>
 </head>
 <body>
@@ -616,6 +802,17 @@
 })();
 </script>
 <div id="bgLayer"><div class="bgl-img" id="bgA"></div><div class="bgl-img" id="bgB"></div></div>
+<canvas id="fxLayer" aria-hidden="true"></canvas>
+<div id="fxDock">
+  <div class="fxd-ball" id="fxdBall" title="粒子天气"><span id="fxdIcon">✦</span></div>
+  <div class="fxd-panel" id="fxdPanel">
+    <div class="fxd-title mono">粒子天气 · FX</div>
+    <div class="fxd-status" id="fxdStatus">当前：自动待机</div>
+    <label class="fxd-auto"><input type="checkbox" id="fxdAuto"> 自动粒子（刷新时按概率出现）</label>
+    <div class="fxd-grid" id="fxdGrid"></div>
+    <button class="fxd-stop" id="fxdStop">停止当前效果</button>
+  </div>
+</div>
   <div id="neonCursor" aria-hidden="true"></div>
 
 <nav>
@@ -637,7 +834,7 @@
     <button class="nav-tool" id="themeBtn" data-i18n-title="themeTitle" title="切换黑夜 / 白天">☀️</button>
   </div>
 </nav>
-<div class="admin-bar" id="adminBar" data-i18n-html="adminBar"><b>管理模式已开启</b> — 你现在可以回复聊天、匿名公开记录、上传文件、发布动态、编辑资料。</div>
+<div class="admin-bar" id="adminBar" data-i18n-html="adminBar"><b>管理模式已开启</b> — 你现在可以回复聊天、匿名公开记录、上传文件、发布动态、编辑资料、更换档案照片、编辑页边格言、管理分身问答、增删档案徽章、调节粒子背景。</div>
 
 <div class="wrap">
 
@@ -705,6 +902,7 @@
       <div class="home-main">
     <!-- 目录 -->
     <section class="section">
+      <div class="sec-head"><span class="sec-no">SEC.00</span></div>
       <h2><span class="dot"></span><span data-i18n="toc">目录</span></h2>
       <div class="toc-list">
         <a class="toc-item" data-anchor="secAbout"><span class="toc-no">001</span><span class="toc-cn" data-i18n="about">关于我</span><span class="toc-en">ABOUT ME</span></a>
@@ -766,6 +964,62 @@
           <p class="note" data-i18n="bgHint">最多 16 张；每次打开网页随机选一张，之后每 2~3 分钟自动淡入淡出切换。上传本地图片会自动裁掉黑边并压缩优化（不限原始大小，仅保存在当前浏览器），也可直接粘贴图片链接。</p>
         </div>
       </div>
+
+      <div class="admin-panel" id="specPhotoPanel">
+        <div class="admin-tag" data-i18n="adminPhoto">管理员 · 档案照片</div>
+        <div class="formgrid" style="margin-top:12px">
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <input type="text" id="spUrl" data-i18n-ph="photoUrlPh" placeholder="图片链接（可选）" style="flex:2;min-width:200px">
+            <input type="file" id="spFile" accept="image/*" style="flex:1;min-width:160px">
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+            <button class="btn sm" id="spApply" data-i18n="photoApply">更换照片</button>
+            <button class="btn sm ghost" id="spReset" data-i18n="photoReset">恢复默认</button>
+            <span class="muted" id="spState" style="font-size:12px"></span>
+          </div>
+          <p class="note" data-i18n="photoHint">显示在主页「档案摘要」面板的照片位。本地图片会自动压缩到 240px 并只保存在当前浏览器；也可以直接粘贴图片链接。</p>
+        </div>
+      </div>
+
+      <div class="admin-panel" id="mottoPanel">
+        <div class="admin-tag" data-i18n="adminMotto">管理员 · 页边格言</div>
+        <div class="formgrid" style="margin-top:12px">
+          <input type="text" id="mtMain" data-i18n-ph="mottoMainPh" placeholder="格言主句，如：Hello World!">
+          <input type="text" id="mtSub" data-i18n-ph="mottoSubPh" placeholder="格言副句，如：一个记录生活与热爱的小站">
+          <div style="display:flex;gap:10px">
+            <button class="btn sm" id="mtSave" data-i18n="mottoSave">保存格言</button>
+            <button class="btn sm ghost" id="mtReset" data-i18n="mottoReset">恢复默认</button>
+          </div>
+          <p class="note" data-i18n="mottoHint">显示在主页右侧边栏的格言卡。留空即恢复默认文案。</p>
+        </div>
+      </div>
+
+      <div class="admin-panel" id="badgePanel">
+        <div class="admin-tag" data-i18n="adminBadges">管理员 · 档案徽章</div>
+        <div class="formgrid" style="margin-top:12px">
+          <input type="text" id="badgeInp" data-i18n-ph="badgePh" placeholder="徽章文字，如：夜猫子">
+          <div><button class="btn sm" id="badgeAdd" data-i18n="badgeAdd">添加徽章</button></div>
+          <div id="badgeList"></div>
+          <p class="note" data-i18n="badgeHint">显示在主页大名下方的徽章条，带流星划过效果，蓝紫交替配色；文字里可以直接放 Emoji。</p>
+        </div>
+      </div>
+
+      <div class="admin-panel" id="fxPanel">
+        <div class="admin-tag" data-i18n="adminFx">管理员 · 粒子背景</div>
+        <div class="formgrid" style="margin-top:12px">
+          <label>出现概率 <span class="muted" id="fxProbV">35%</span></label>
+          <input type="range" id="fxProb" min="5" max="90" step="5">
+          <label>数量倍率 <span class="muted" id="fxDenV">1.0×</span></label>
+          <input type="range" id="fxDen" min="0.5" max="2" step="0.1">
+          <label>光效强度 <span class="muted" id="fxGlowV">1.0×</span></label>
+          <input type="range" id="fxGlow" min="0" max="2" step="0.1">
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+            <label style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="fxEnabled"> <span data-i18n="fxAutoL">启用自动粒子</span></label>
+            <button class="btn sm" id="fxSave" data-i18n="fxSave">保存粒子设置</button>
+          </div>
+          <p class="note" data-i18n="fxHint">控制全站粒子背景：刷新时按概率触发，最长 7 分钟后淡出并重新判定。访客可用左侧页边小球自行开关或点播效果。</p>
+        </div>
+      </div>
     </section>
 
     <!-- SEC.02 数字分身（第一版布局 · 主页） -->
@@ -788,11 +1042,52 @@
         </div>
       </div>
       <p class="note" style="margin-top:12px" data-i18n="dvNote">提示：这是第一版原型，目前的"数字分身"只会回答几类常见问题。更多能力稍后再加。</p>
+      <div class="admin-panel" id="qaAdminPanel">
+        <div class="admin-tag" data-i18n="adminQa">管理员 · 分身快捷问答</div>
+        <div class="formgrid" style="margin-top:12px">
+          <input type="text" id="qaQ" data-i18n-ph="qaQPh" placeholder="问题，如：你喜欢什么颜色？">
+          <textarea id="qaA" rows="2" data-i18n-ph="qaAPh" placeholder="对应的答案，如：蓝色，尤其是深海蓝。"></textarea>
+          <div><button class="btn sm" id="qaAdd" data-i18n="qaAdd">添加问答</button></div>
+          <div id="qaList"></div>
+        </div>
+      </div>
     </section>
 
-    <!-- SEC.03 意见箱 -->
-    <section class="section" id="secFeedback">
+    <!-- SEC.03 联系速览（副页摘要 · 联系我） -->
+    <section class="section" id="secPvContact">
       <div class="sec-head"><span class="sec-no">SEC.03</span></div>
+      <h2><a class="pv-title" href="#contact"><span class="dot"></span><span data-i18n="pvContactTitle">联系速览</span><span class="pv-go">→</span></a></h2>
+      <div class="sec-sub" data-i18n="pvContactSub">Contact · 我最常看的三个渠道</div>
+      <div class="pv-list" id="pvContact"></div>
+    </section>
+
+    <!-- SEC.04 成果摘选（副页摘要 · 我的成果） -->
+    <section class="section" id="secPvWorks">
+      <div class="sec-head"><span class="sec-no">SEC.04</span></div>
+      <h2><a class="pv-title" href="#works"><span class="dot"></span><span data-i18n="pvWorksTitle">成果摘选</span><span class="pv-go">→</span></a></h2>
+      <div class="sec-sub" data-i18n="pvWorksSub">Works · 最新上传的三份</div>
+      <div class="pv-list" id="pvWorks"></div>
+    </section>
+
+    <!-- SEC.05 动态近况（副页摘要 · 动态） -->
+    <section class="section" id="secPvMoments">
+      <div class="sec-head"><span class="sec-no">SEC.05</span></div>
+      <h2><a class="pv-title" href="#moments"><span class="dot"></span><span data-i18n="pvMomentsTitle">动态近况</span><span class="pv-go">→</span></a></h2>
+      <div class="sec-sub" data-i18n="pvMomentsSub">Moments · 最近两条</div>
+      <div class="pv-list" id="pvMoments"></div>
+    </section>
+
+    <!-- SEC.06 仓库速取（副页摘要 · 我的仓库） -->
+    <section class="section" id="secPvRepo">
+      <div class="sec-head"><span class="sec-no">SEC.06</span></div>
+      <h2><a class="pv-title" href="#repo"><span class="dot"></span><span data-i18n="pvRepoTitle">仓库速取</span><span class="pv-go">→</span></a></h2>
+      <div class="sec-sub" data-i18n="pvRepoSub">Repo · 最近收的三条链接</div>
+      <div class="pv-list" id="pvRepo"></div>
+    </section>
+
+    <!-- SEC.07 意见箱 -->
+    <section class="section" id="secFeedback">
+      <div class="sec-head"><span class="sec-no">SEC.07</span></div>
       <h2><span class="dot"></span><span data-i18n="fbTitle">意见箱</span></h2>
       <div class="sec-sub" data-i18n="fbSub">Feedback Box · 建议收集</div>
       <p class="note" style="margin-bottom:12px" data-i18n="fbNote">对这个网站有什么建议或想法？写下来投给我，我会认真看。（第一版原型：反馈保存在当前浏览器。）</p>
@@ -989,7 +1284,8 @@ function defaultStore() {
         { k: "身份", v: "全日制大学生" },
         { k: "兴趣", v: "漫画 · 足球 · 随心所欲" },
         { k: "特点", v: "行为举止怪异，动作笨拙且不协调" },
-        { k: "做过什么", v: "搞了一些奇怪的玩意；写过一丢丢喜剧漫才。脑子里全是想法，却从来没干过。" }
+        { k: "做过什么", v: "搞了一些奇怪的玩意；写过一丢丢喜剧漫才。脑子里全是想法，却从来没干过。" },
+        { k: "联系地址", v: "pf6917y9@outlook.com" }
       ]
     },
     contacts: {
@@ -1006,7 +1302,10 @@ function defaultStore() {
     works: { tt: [], results: [] },
     moments: [],
     feedback: [],
-    links: []
+    links: [],
+    motto: { main: "", sub: "" },
+    qa: [],
+    fx: { prob: 0.35, density: 1, glow: 1, enabled: true }
   };
 }
 
@@ -1032,12 +1331,19 @@ function mergeStore(base, d) {
   if (Array.isArray(d.moments)) out.moments = d.moments;
   if (Array.isArray(d.feedback)) out.feedback = d.feedback;
   if (Array.isArray(d.links)) out.links = d.links;
+  if (d.motto && typeof d.motto === 'object') out.motto = Object.assign({}, out.motto, d.motto);
+  if (Array.isArray(d.qa)) out.qa = d.qa;
+  if (d.fx && typeof d.fx === "object") out.fx = Object.assign({}, out.fx, d.fx);
   return out;
 }
 function saveStore() { localStorage.setItem(LS_KEY, JSON.stringify(store)); }
 
 var store = loadStore();
 if (store.profile.name === "吕佳熹") { store.profile.name = "CoCo"; saveStore(); }
+if (!store.profile.info.some(function(it){ return it.k === "联系地址"; })) {
+  store.profile.info.push({ k: "联系地址", v: "pf6917y9@outlook.com" });
+  saveStore();
+}
 var am = sessionStorage.getItem(LS_SESSION) === "1";
 var curPage = "home";
 var worksTab = "tt";
@@ -1115,6 +1421,8 @@ function render() {
   renderMoments();
   renderFb();
   renderLinks();
+  renderHomePreviews();
+  renderBadgeList();
   renderAdminUI();
 }
 
@@ -1152,7 +1460,13 @@ function renderLinks() {
 function renderHero() {
   $("heroName").textContent = trData(store.profile.name);
   $("heroTag").textContent = "§ " + trData(store.profile.tagline);
-  $("heroBadges").innerHTML = store.profile.badges.map(function(b,i){ return '<span class="badge'+(i===1?" blue":"")+'">'+esc(trData(b))+"</span>"; }).join("");
+  $("heroBadges").innerHTML = store.profile.badges.map(function(b,i){
+    var meteors = "";
+    for (var mi = 0; mi < 2; mi++) {
+      meteors += '<span class="pill-meteor" style="left:' + (Math.floor(Math.random()*135)-35) + '%;animation-delay:' + (Math.random()*3).toFixed(2) + 's;animation-duration:' + (Math.floor(Math.random()*3)+5) + 's"></span>';
+    }
+    return '<span class="badge'+(i%2===1?" blue":"")+'"><span class="bt">'+esc(trData(b))+"</span>"+meteors+"</span>";
+  }).join("");
   if ($("specOwner")) $("specOwner").textContent = trData(store.profile.name);
   if ($("specUpdated")) {
     var d = new Date();
@@ -1615,6 +1929,8 @@ function dvBotSay(text) {
 }
 function dvAsk(q) {
   var low = q.toLowerCase();
+  var custom = qaFind(q);
+  if (custom) return custom;
   for (var i = 0; i < KNOWLEDGE.length; i++) {
     var item = KNOWLEDGE[i];
     for (var j = 0; j < item.keys.length; j++) {
@@ -1663,7 +1979,7 @@ var STR = {
   wxLoading: ["天气获取中…", "Loading weather…"],
   langTitle: ["切换语言 / Switch language", "Switch language / 切换语言"],
   themeTitle: ["切换黑夜 / 白天", "Toggle dark / light"],
-  adminBar: ["🛠️ <b>管理模式已开启</b> — 你现在可以回复聊天、匿名公开记录、上传文件、发布动态、编辑资料。", "🛠️ <b>Admin mode on</b> — you can reply to chats, publish anonymously, upload files, post moments, and edit the profile."],
+  adminBar: ["🛠️ <b>管理模式已开启</b> — 你现在可以回复聊天、匿名公开记录、上传文件、发布动态、编辑资料、更换档案照片、编辑页边格言、管理分身问答、增删档案徽章、调节粒子背景。", "🛠️ <b>Admin mode on</b> — you can reply to chats, publish anonymously, upload files, post moments, edit the profile, change the archive photo, edit the motto, manage avatar Q&A, manage profile badges, and tune background FX."],
   about: ["👤 关于我", "👤 About Me"],
   adminTag: ["管理员", "ADMIN"],
   editProfile: ["编辑简介", "Edit Profile"],
@@ -1713,6 +2029,37 @@ var STR = {
   confirm: ["确认", "Confirm"],
   modalNote: ["原型说明：为本地演示的简单密码验证，真正的多用户权限需要后端。", "Prototype note: simple local password check; real multi-user auth needs a backend."],
   adminBg: ["管理员 · 网页背景", "Admin · Site background"],
+  adminPhoto: ["管理员 · 档案照片", "ADMIN · Archive photo"],
+  photoUrlPh: ["图片链接（可选）", "Image URL (optional)"],
+  photoApply: ["更换照片", "Apply photo"],
+  photoReset: ["恢复默认", "Reset"],
+  photoHint: ["显示在主页「档案摘要」面板的照片位。本地图片会自动压缩到 240px 并只保存在当前浏览器；也可以直接粘贴图片链接。", "Shown in the SPEC panel photo slot on the home page. Local images are auto-compressed to 240px and stored in this browser only; you can also paste an image URL."],
+  adminMotto: ["管理员 · 页边格言", "ADMIN · Sidebar motto"],
+  mottoMainPh: ["格言主句，如：Hello World!", "Motto main line, e.g. Hello World!"],
+  mottoSubPh: ["格言副句，如：一个记录生活与热爱的小站", "Motto sub line"],
+  mottoSave: ["保存格言", "Save motto"],
+  mottoReset: ["恢复默认", "Reset"],
+  mottoHint: ["显示在主页右侧边栏的格言卡。留空即恢复默认文案。", "Shown in the sidebar motto card on the home page. Leave empty to restore defaults."],
+  adminQa: ["管理员 · 分身快捷问答", "ADMIN · Avatar quick Q&A"],
+  qaQPh: ["问题，如：你喜欢什么颜色？", "Question, e.g. your favorite color?"],
+  qaAPh: ["对应的答案，如：蓝色，尤其是深海蓝。", "The answer to that question"],
+  qaAdd: ["添加问答", "Add Q&A"],
+  pvContactTitle: ["联系速览", "Quick Contact"],
+  pvContactSub: ["Contact · 我最常看的三个渠道", "Contact · My three most-checked channels"],
+  pvWorksTitle: ["成果摘选", "Selected Works"],
+  pvWorksSub: ["Works · 最新上传的三份", "Works · Three latest uploads"],
+  pvMomentsTitle: ["动态近况", "Recent Moments"],
+  pvMomentsSub: ["Moments · 最近两条", "Moments · Latest two"],
+  pvRepoTitle: ["仓库速取", "Repo Quick Pick"],
+  pvRepoSub: ["Repo · 最近收的三条链接", "Repo · Three latest links"],
+  adminBadges: ["管理员 · 档案徽章", "Admin · Profile Badges"],
+  badgePh: ["徽章文字，如：夜猫子", "Badge text, e.g. Night owl"],
+  badgeAdd: ["添加徽章", "Add Badge"],
+  badgeHint: ["显示在主页大名下方的徽章条，带流星划过效果，蓝紫交替配色；文字里可以直接放 Emoji。", "Shown under the hero name with meteor streaks, alternating purple/blue; emoji allowed in text."],
+  adminFx: ["管理员 · 粒子背景", "Admin · Background FX"],
+  fxAutoL: ["启用自动粒子", "Enable auto FX"],
+  fxSave: ["保存粒子设置", "Save FX settings"],
+  fxHint: ["控制全站粒子背景：刷新时按概率触发，最长 7 分钟后淡出并重新判定。访客可用左侧页边小球自行开关或点播效果。", "Site-wide background FX: rolls on refresh, fades out after up to 7 min, then re-rolls. Visitors can toggle or trigger effects via the left-edge ball."],
   bgUrlPh: ["图片链接（可选）", "Image URL (optional)"],
   bgApply: ["添加背景图", "Add images"],
   bgClear: ["全部清除", "Clear all"],
@@ -1772,7 +2119,8 @@ var DATA_EN = {
   "谷歌邮箱": "Gmail",
   "有正事联系": "For serious matters",
   "学生邮箱": "Student email",
-  "学校相关": "School related"
+  "学校相关": "School related",
+  "联系地址": "Contact"
 };
 function trData(s){ return (LANG === "en" && DATA_EN[s]) ? DATA_EN[s] : s; }
 
@@ -2362,6 +2710,671 @@ sideTick();
     if (!e.relatedTarget) document.body.classList.remove("cur-on");
   });
 })();
+
+/* ================= 管理扩展：档案照片 / 页边格言 / 分身快捷问答 ================= */
+var LS_SPECPHOTO = "lujiaxi_spec_photo";
+
+/* ---- 档案摘要照片 ---- */
+function applySpecPhoto(){
+  var box = document.querySelector("#page-home .spec-photo");
+  var url = "";
+  try { url = localStorage.getItem(LS_SPECPHOTO) || ""; } catch(e) {}
+  if (box) {
+    var img = box.querySelector("img");
+    var svg = box.querySelector("svg");
+    if (url) {
+      if (!img) { img = document.createElement("img"); img.alt = "SPEC PHOTO"; box.insertBefore(img, box.firstChild); }
+      img.src = url;
+      if (svg) svg.style.display = "none";
+    } else {
+      if (img) img.remove();
+      if (svg) svg.style.display = "";
+    }
+  }
+  var st = $("spState");
+  if (st) st.textContent = url ? T("当前：自定义照片", "Current: custom photo") : T("当前：默认图标", "Current: default icon");
+}
+function spProcessFile(file){
+  return new Promise(function(res, rej){
+    var r = new FileReader();
+    r.onload = function(){
+      var im = new Image();
+      im.onload = function(){
+        var s = Math.min(1, 240 / Math.max(im.width || 1, im.height || 1));
+        var w = Math.max(1, Math.round(im.width * s)), h = Math.max(1, Math.round(im.height * s));
+        var cv = document.createElement("canvas"); cv.width = w; cv.height = h;
+        cv.getContext("2d").drawImage(im, 0, 0, w, h);
+        res(cv.toDataURL("image/jpeg", 0.85));
+      };
+      im.onerror = function(){ rej(new Error("img load")); };
+      im.src = r.result;
+    };
+    r.onerror = function(){ rej(new Error("file read")); };
+    r.readAsDataURL(file);
+  });
+}
+$("spApply").addEventListener("click", function(){
+  if (!am) { toast(T("请先进入管理模式", "Enter admin mode first")); return; }
+  var url = $("spUrl").value.trim();
+  var files = $("spFile").files || [];
+  var f = files.length ? files[0] : null;
+  if (f) {
+    spProcessFile(f).then(function(dataUrl){
+      try { localStorage.setItem(LS_SPECPHOTO, dataUrl); } catch(e) { toast(T("图片太大，存不下", "Image too large to store")); return; }
+      applySpecPhoto();
+      $("spUrl").value = ""; $("spFile").value = "";
+      toast(T("档案照片已更换", "Archive photo updated"));
+    }).catch(function(){ toast(T("图片读取失败", "Failed to read image")); });
+    return;
+  }
+  if (url) {
+    try { localStorage.setItem(LS_SPECPHOTO, url); } catch(e) {}
+    applySpecPhoto();
+    $("spUrl").value = "";
+    toast(T("档案照片已更换", "Archive photo updated"));
+    return;
+  }
+  toast(T("先填图片链接或选择图片", "Enter an image URL or pick a file first"));
+});
+$("spReset").addEventListener("click", function(){
+  if (!am) { toast(T("请先进入管理模式", "Enter admin mode first")); return; }
+  try { localStorage.removeItem(LS_SPECPHOTO); } catch(e) {}
+  applySpecPhoto();
+  toast(T("已恢复默认图标", "Default icon restored"));
+});
+
+/* ---- 页边格言 ---- */
+var MT_DEFAULT_MAIN = "Hello World!";
+function applyMotto(){
+  var m = store.motto || { main: "", sub: "" };
+  var mainEl = document.querySelector("#page-home .motto-main");
+  var subEl = document.querySelector("#page-home .motto-sub");
+  if (mainEl) mainEl.textContent = (m.main || "").trim() || MT_DEFAULT_MAIN;
+  if (subEl) {
+    var sub = (m.sub || "").trim();
+    if (sub) {
+      subEl.removeAttribute("data-i18n");
+      subEl.textContent = sub;
+    } else {
+      subEl.setAttribute("data-i18n", "mottoSub");
+      if (STR.mottoSub) subEl.textContent = STR.mottoSub[LANG === "en" ? 1 : 0];
+    }
+  }
+}
+$("mtSave").addEventListener("click", function(){
+  if (!am) { toast(T("请先进入管理模式", "Enter admin mode first")); return; }
+  store.motto = { main: $("mtMain").value.trim(), sub: $("mtSub").value.trim() };
+  saveStore(); applyMotto();
+  toast(T("格言已保存", "Motto saved"));
+});
+$("mtReset").addEventListener("click", function(){
+  if (!am) { toast(T("请先进入管理模式", "Enter admin mode first")); return; }
+  store.motto = { main: "", sub: "" };
+  saveStore(); applyMotto();
+  $("mtMain").value = ""; $("mtSub").value = "";
+  toast(T("已恢复默认格言", "Default motto restored"));
+});
+
+/* ---- 分身快捷问答 ---- */
+function qaFind(q){
+  var low = (q || "").trim().toLowerCase();
+  if (!low) return "";
+  for (var i = 0; i < store.qa.length; i++) {
+    var k = (store.qa[i].q || "").trim().toLowerCase();
+    if (k && (low === k || low.indexOf(k) !== -1)) return store.qa[i].a;
+  }
+  return "";
+}
+function renderQaChips(){
+  var box = $("dvSuggest");
+  if (!box) return;
+  box.querySelectorAll("[data-qa]").forEach(function(b){ b.remove(); });
+  store.qa.forEach(function(it){
+    var b = document.createElement("button");
+    b.setAttribute("data-qa", it.id);
+    b.textContent = it.q;
+    box.appendChild(b);
+  });
+}
+function renderQaList(){
+  var box = $("qaList");
+  if (!box) return;
+  if (!store.qa.length) {
+    box.innerHTML = '<p class="note" style="margin:10px 0 0">' + T("还没有自定义问答。添加后，问题会作为快捷提问按钮出现在聊天框，分身按对应答案回复。", "No custom Q&A yet. Added questions appear as quick-ask buttons in the chat, and the avatar replies with your answers.") + '</p>';
+    return;
+  }
+  box.innerHTML = store.qa.map(function(it, i){
+    return '<div class="qa-row"><div class="qa-txt"><b>Q</b>　' + esc(it.q) + '<br><b>A</b>　' + esc(it.a) + '</div>' +
+      '<button class="btn sm ghost" data-delqa="' + i + '" style="color:var(--danger);flex-shrink:0">' + T("删除", "Delete") + '</button></div>';
+  }).join("");
+}
+$("qaAdd").addEventListener("click", function(){
+  if (!am) { toast(T("请先进入管理模式", "Enter admin mode first")); return; }
+  var q = $("qaQ").value.trim(), a = $("qaA").value.trim();
+  if (!q || !a) { toast(T("问题和答案都要填写", "Both question and answer are required")); return; }
+  store.qa.push({ id: uid(), q: q, a: a });
+  saveStore(); renderQaList(); renderQaChips();
+  $("qaQ").value = ""; $("qaA").value = "";
+  toast(T("问答已添加，快捷按钮已同步", "Q&A added - quick-ask button updated"));
+});
+$("qaList").addEventListener("click", function(e){
+  var b = e.target.closest("[data-delqa]");
+  if (!b) return;
+  store.qa.splice(+b.getAttribute("data-delqa"), 1);
+  saveStore(); renderQaList(); renderQaChips();
+  toast(T("已删除问答", "Q&A deleted"));
+});
+
+/* ---- 初始化 ---- */
+applySpecPhoto();
+applyMotto();
+renderQaChips();
+renderQaList();
+$("mtMain").value = (store.motto && store.motto.main) || "";
+$("mtSub").value = (store.motto && store.motto.sub) || "";
+
+/* ================= 主页副页摘要板块（SEC.03-06，数据与副页实时同步） ================= */
+function pvDate(t) { var d = new Date(t); return d.getFullYear() + "." + String(d.getMonth() + 1).padStart(2, "0") + "." + String(d.getDate()).padStart(2, "0"); }
+function renderHomePreviews() {
+  if (!$("pvContact")) return;
+  /* 联系速览：闲聊前 2 + 正事前 1 */
+  var cc = store.contacts.casual.slice(0, 2).concat(store.contacts.formal.slice(0, 1));
+  $("pvContact").innerHTML = cc.length ? cc.map(function (o) {
+    return '<div class="pv-row"><span class="pv-k">' + esc(trData(o.label)) + '</span><span class="pv-v">' + esc(trData(o.value)) + '</span></div>';
+  }).join("") : '<p class="muted">' + T("暂无联系方式。", "No contacts yet.") + '</p>';
+  /* 成果摘选：两分类合并按时间取最新 3 */
+  var ww = store.works.tt.concat(store.works.results).sort(function (a, b) { return b.time - a.time; }).slice(0, 3);
+  $("pvWorks").innerHTML = ww.length ? ww.map(function (f) {
+    return '<div class="pv-row"><span class="pv-k">' + esc(f.name) + '</span><span class="pv-v">' + pvDate(f.time) + '</span></div>';
+  }).join("") : '<p class="muted">' + T("还没有成果文件。", "No works yet.") + '</p>';
+  /* 动态近况：最新 2 条（仅文字，两行截断） */
+  var mm = store.moments.slice().sort(function (a, b) { return b.time - a.time; }).slice(0, 2);
+  $("pvMoments").innerHTML = mm.length ? mm.map(function (m) {
+    return '<div class="pv-row pv-mo"><span class="pv-k pv-mtxt">' + esc(m.text) + '</span><span class="pv-v">' + pvDate(m.time) + '</span></div>';
+  }).join("") : '<p class="muted">' + T("还没有动态。", "No moments yet.") + '</p>';
+  /* 仓库速取：最新 3 条，整行可点击 */
+  var ll = store.links.slice(-3).reverse();
+  $("pvRepo").innerHTML = ll.length ? ll.map(function (x) {
+    return '<a class="pv-row lnk" href="' + esc(x.url) + '" target="_blank" rel="noopener"><span class="pv-k">' + esc(x.note || x.url) + '</span><span class="pv-v">' + esc(x.url) + '</span></a>';
+  }).join("") : '<p class="muted">' + T("仓库还空着。", "Nothing stored yet.") + '</p>';
+}
+
+/* ================= 档案徽章管理（流星徽章 · 增删） ================= */
+function renderBadgeList() {
+  var box = $("badgeList");
+  if (!box) return;
+  var bs = (store.profile && store.profile.badges) || [];
+  box.innerHTML = bs.length ? bs.map(function (b, i) {
+    return '<div class="pv-row"><span class="pv-k">' + esc(trData(b)) + '</span><button class="btn sm ghost" data-delbadge="' + i + '" style="color:var(--danger)">' + T("删除", "Delete") + '</button></div>';
+  }).join("") : '<p class="muted">' + T("还没有徽章。", "No badges yet.") + '</p>';
+}
+$("badgeAdd").addEventListener("click", function () {
+  var t = $("badgeInp").value.trim();
+  if (!t) { toast(T("先写徽章文字", "Write badge text first")); return; }
+  store.profile.badges.push(t);
+  $("badgeInp").value = "";
+  saveStore(); renderHero(); renderBadgeList();
+  toast(T("徽章已添加", "Badge added"));
+});
+$("badgeInp").addEventListener("keydown", function (e) {
+  if (e.key === "Enter") $("badgeAdd").click();
+});
+$("badgeList").addEventListener("click", function (e) {
+  var b = e.target.closest("[data-delbadge]");
+  if (!b) return;
+  store.profile.badges.splice(+b.getAttribute("data-delbadge"), 1);
+  saveStore(); renderHero(); renderBadgeList();
+});
+
+/* ================= 粒子背景引擎 =================
+ * 刷新时 25% 概率触发；昼夜门控粒子池等概率选 1 种；
+ * 淡入 4s（数量渐增+由淡到正常）→ 最长 7 分钟 → 淡出 5s（渐少渐淡）→ 重新判定。
+ * 切换副页不重新判定；canvas 指针穿透，鼠标互动监听 window。 */
+(function () {
+  var cv = $("fxLayer");
+  if (!cv) return;
+  var ctx = cv.getContext("2d");
+  var TAU = Math.PI * 2;
+  var W = 0, H = 0;
+  function resize() {
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth; H = window.innerHeight;
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    cv.style.width = W + "px"; cv.style.height = H + "px";
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  window.addEventListener("resize", resize); resize();
+
+  var mouse = { x: -9999, y: -9999 };
+  window.addEventListener("mousemove", function (e) { mouse.x = e.clientX; mouse.y = e.clientY; });
+  document.documentElement.addEventListener("mouseleave", function () { mouse.x = -9999; mouse.y = -9999; });
+
+  function rand(a, b) { return a + Math.random() * (b - a); }
+  function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+  function isLight() { return document.body.classList.contains("light"); }
+  function baseCol() { return isLight() ? "100,116,139" : "255,255,255"; }
+  function rgba(rgb, a) { return "rgba(" + rgb + "," + a + ")"; }
+  var KIND_COL = {
+    rain:   { dark: "170,190,225", light: "100,116,139" },
+    breeze: { dark: "170,176,186", light: "125,132,145" },
+    cloud:  { dark: "226,232,255", light: "255,255,255" }
+  };
+  function kcol(kind) { var o = KIND_COL[kind]; return o ? (isLight() ? o.light : o.dark) : baseCol(); }
+  function starTint() { return isLight() ? pick(["100,116,139", "109,91,214", "29,127,184"]) : pick(["255,255,255", "205,211,255", "181,231,255"]); }
+  function fireflyTint() { return isLight() ? pick(["120,110,60", "100,116,139"]) : pick(["216,255,163", "255,244,196", "181,231,255"]); }
+
+  /* 粒子数量按视口面积缩放（实验室卡片 360x150 为基准），封顶 3 倍保持稀疏 */
+  function scaleN(n) { return Math.max(6, Math.round(n * Math.min(3, Math.max(1, (W * H) / 54000)) * (SET.density || 1))); }
+
+  var CFG = {
+    snowA:   { kind: "snow", n: 26, r: [1.5, 3], vy: [30, 50], sway: 12, sp: [0.6, 1.2], a: [0.5, 0.9], soft: 0, when: "both" },
+    snowC:   { kind: "snow", n: 14, r: [3, 5], vy: [20, 32], sway: 18, sp: [0.4, 0.8], a: [0.4, 0.7], soft: 7, when: "both" },
+    rainA:   { kind: "rain", n: 68, slant: 0.14, len: [12, 20], v: [380, 480], a: [0.25, 0.4], splash: false, when: "both" },
+    rainC:   { kind: "rain", n: 55, slant: 0.08, len: [10, 16], v: [340, 440], a: [0.25, 0.38], splash: true, when: "both" },
+    breezeB: { kind: "breezeB", n: 18, r: [0.8, 1.8], v: [30, 60], bob: [6, 14], a: [0.25, 0.4], when: "both" },
+    breezeC: { kind: "breezeC", n: 6, len: [90, 150], v: [26, 44], cur: [8, 18], a: [0.08, 0.14], when: "day" },
+    cloudA:  { kind: "cloudA", n: 5, r: [40, 80], v: [6, 12], a: [0.12, 0.18], when: "day" },
+    cloudB:  { kind: "cloudB", n: 3, h: [26, 44], v: [8, 16], a: [0.1, 0.16], when: "day" },
+    starA:   { kind: "starA", n: 30, r: [0.8, 2], drift: [4, 8], tw: [0.6, 1.6], a: [0.35, 0.75], amp: 0.35, when: "night" },
+    starB:   { kind: "firefly", n: 20, r: [1, 2.4], sp: [8, 16], repel: 90, when: "night" },
+    starC:   { kind: "starC", n: 24, r: [0.8, 1.6], drift: [3, 6], a: [0.4, 0.7], link: 70, attract: 130, when: "night" },
+    meteorB: { kind: "meteor", every: [3.5, 6], tail: 150, v: 210, head: 2.4, glow: 9, embers: false, burst: 2.3, when: "night" },
+    meteorC: { kind: "meteor", every: [3, 5], tail: 100, v: 240, head: 2, glow: 4, embers: true, burst: 2.3, when: "night" }
+  };
+
+  var SET = { prob: 0.35, density: 1, glow: 1, enabled: true };
+  window.FXSET = SET;
+  var S = { phase: "idle", key: "", cfg: null, parts: [], rings: [], embers: [], t: 0, last: 0, k: 0, endAt: 0, next: 0, raf: 0 };
+
+  function makeParts() {
+    var cc = S.cfg, i;
+    S.parts = []; S.rings = []; S.embers = [];
+    var n = scaleN(cc.n || 10);
+    for (i = 0; i < n; i++) {
+      var u = Math.random(); /* 个体出现阈值：k 上升时粒子按 u 陆续现身，实现数量渐增 */
+      if (cc.kind === "snow") S.parts.push({ u: u, x0: rand(0, W), y: rand(-H, H), r: rand(cc.r[0], cc.r[1]), v: rand(cc.vy[0], cc.vy[1]), ph: rand(0, TAU), sp: rand(cc.sp[0], cc.sp[1]), a: rand(cc.a[0], cc.a[1]) });
+      else if (cc.kind === "rain") S.parts.push({ u: u, x: rand(-40, W), y: rand(-H, H), len: rand(cc.len[0], cc.len[1]), v: rand(cc.v[0], cc.v[1]), a: rand(cc.a[0], cc.a[1]) });
+      else if (cc.kind === "breezeB") S.parts.push({ u: u, x: rand(-150, W), y: rand(12, H - 12), r: rand(cc.r[0], cc.r[1]), v: rand(cc.v[0], cc.v[1]), bob: rand(cc.bob[0], cc.bob[1]), a: rand(cc.a[0], cc.a[1]), ph: rand(0, TAU) });
+      else if (cc.kind === "breezeC") S.parts.push({ u: u, x: rand(-150, W), y: rand(14, H - 14), len: rand(cc.len[0], cc.len[1]), v: rand(cc.v[0], cc.v[1]), cur: rand(cc.cur[0], cc.cur[1]) * (Math.random() < 0.5 ? 1 : -1), a: rand(cc.a[0], cc.a[1]) });
+      else if (cc.kind === "cloudA") S.parts.push({ u: u, x: rand(0, W), y: rand(H * 0.1, H * 0.9), r: rand(cc.r[0], cc.r[1]), v: rand(cc.v[0], cc.v[1]), a: rand(cc.a[0], cc.a[1]) });
+      else if (cc.kind === "cloudB") S.parts.push({ u: u, y: rand(H * 0.12, H * 0.88), h: rand(cc.h[0], cc.h[1]), v: rand(cc.v[0], cc.v[1]), a: rand(cc.a[0], cc.a[1]), ph: rand(0, TAU) });
+      else if (cc.kind === "starA" || cc.kind === "starC") {
+        var d = rand(cc.drift[0], cc.drift[1]), an = rand(0, TAU);
+        S.parts.push({ u: u, x: rand(0, W), y: rand(0, H), r: rand(cc.r[0], cc.r[1]), vx: Math.cos(an) * d, vy: Math.sin(an) * d, tw: cc.tw ? rand(cc.tw[0], cc.tw[1]) : 0, ph: rand(0, TAU), a: rand(cc.a[0], cc.a[1]), tint: starTint() });
+      }
+      else if (cc.kind === "firefly") S.parts.push({ u: u, x: rand(0, W), y: rand(0, H), r: rand(cc.r[0], cc.r[1]), ang: rand(0, TAU), sp: rand(cc.sp[0], cc.sp[1]), tint: fireflyTint(), cyc: "dark", ct: rand(0.2, 2.5), dur: rand(1, 3), fl: rand(0, TAU) });
+    }
+  }
+
+  function step(dt) {
+    var cc = S.cfg, K = S.k, i, j, f;
+    var kind = cc.kind;
+    if (kind === "snow") {
+      var col1 = isLight() ? "255,255,255" : baseCol();
+      if (isLight()) { ctx.shadowBlur = 4; ctx.shadowColor = "rgba(100,116,139,.85)"; }
+      else if (cc.soft) { ctx.shadowBlur = cc.soft * SET.glow; ctx.shadowColor = rgba(col1, 0.8 * K); }
+      for (i = 0; i < S.parts.length; i++) {
+        f = S.parts[i]; if (f.u > K) continue;
+        f.y += f.v * dt;
+        if (f.y > H + 6) { f.y = -6; f.x0 = rand(0, W); }
+        var x = f.x0 + Math.sin(S.t * f.sp + f.ph) * cc.sway;
+        ctx.beginPath(); ctx.arc(x, f.y, f.r, 0, TAU);
+        ctx.fillStyle = rgba(col1, f.a * K); ctx.fill();
+      }
+      ctx.shadowBlur = 0;
+    } else if (kind === "rain") {
+      var col2 = kcol("rain");
+      ctx.lineWidth = 1;
+      for (i = 0; i < S.parts.length; i++) {
+        f = S.parts[i]; if (f.u > K) continue;
+        f.y += f.v * dt; f.x += f.v * cc.slant * dt;
+        if (f.y - f.len > H) {
+          if (cc.splash && K > 0.5 && f.x > 0 && f.x < W) S.rings.push({ x: f.x, r: 1, a: 0.5 });
+          f.y = rand(-60, -10); f.x = rand(-40, W);
+        }
+        ctx.beginPath(); ctx.moveTo(f.x, f.y);
+        ctx.lineTo(f.x - f.len * cc.slant, f.y - f.len);
+        ctx.strokeStyle = rgba(col2, f.a * K); ctx.stroke();
+      }
+      for (j = S.rings.length - 1; j >= 0; j--) {
+        var g0 = S.rings[j];
+        g0.r += 26 * dt; g0.a -= 1.5 * dt;
+        if (g0.a <= 0 || K <= 0) { S.rings.splice(j, 1); continue; }
+        ctx.beginPath(); ctx.ellipse(g0.x, H - 2, g0.r, g0.r * 0.32, 0, 0, TAU);
+        ctx.strokeStyle = rgba(col2, g0.a * K); ctx.stroke();
+      }
+    } else if (kind === "breezeB") {
+      var col3 = kcol("breeze");
+      for (i = 0; i < S.parts.length; i++) {
+        f = S.parts[i]; if (f.u > K) continue;
+        f.x += f.v * dt;
+        if (f.x > W + 6) { f.x = -6; f.y = rand(12, H - 12); }
+        var yy = f.y + Math.sin(S.t * 1.1 + f.ph) * f.bob;
+        ctx.beginPath(); ctx.arc(f.x, yy, f.r, 0, TAU);
+        ctx.fillStyle = rgba(col3, f.a * K); ctx.fill();
+      }
+    } else if (kind === "breezeC") {
+      var col4 = kcol("breeze");
+      for (i = 0; i < S.parts.length; i++) {
+        f = S.parts[i]; if (f.u > K) continue;
+        f.x += f.v * dt;
+        if (f.x - f.len > W) { f.x = -f.len; f.y = rand(14, H - 14); }
+        ctx.beginPath();
+        ctx.moveTo(f.x - f.len, f.y);
+        ctx.quadraticCurveTo(f.x - f.len / 2, f.y + f.cur, f.x, f.y);
+        ctx.lineWidth = 1.4; ctx.strokeStyle = rgba(col4, f.a * K); ctx.stroke();
+      }
+    } else if (kind === "cloudA") {
+      var col5 = kcol("cloud");
+      for (i = 0; i < S.parts.length; i++) {
+        f = S.parts[i]; if (f.u > K) continue;
+        f.x += f.v * dt;
+        if (f.x - f.r > W) { f.x = -f.r; f.y = rand(H * 0.1, H * 0.9); }
+        var g = ctx.createRadialGradient(f.x, f.y, 0, f.x, f.y, f.r);
+        g.addColorStop(0, rgba(col5, f.a * K)); g.addColorStop(1, rgba(col5, 0));
+        ctx.fillStyle = g; ctx.fillRect(f.x - f.r, f.y - f.r, f.r * 2, f.r * 2);
+      }
+    } else if (kind === "cloudB") {
+      var col6 = kcol("cloud");
+      for (i = 0; i < S.parts.length; i++) {
+        f = S.parts[i]; if (f.u > K) continue;
+        var yy2 = f.y + Math.sin(S.t * 0.3 + f.ph) * 8;
+        var pulse = f.a * (0.7 + 0.3 * Math.sin(S.t * 0.5 + f.ph * 2)) * K;
+        var lg = ctx.createLinearGradient(0, yy2 - f.h, 0, yy2 + f.h);
+        lg.addColorStop(0, rgba(col6, 0)); lg.addColorStop(0.5, rgba(col6, pulse)); lg.addColorStop(1, rgba(col6, 0));
+        ctx.fillStyle = lg; ctx.fillRect(0, yy2 - f.h, W, f.h * 2);
+      }
+    } else if (kind === "starA") {
+      for (i = 0; i < S.parts.length; i++) {
+        f = S.parts[i]; if (f.u > K) continue;
+        f.x += f.vx * dt; f.y += f.vy * dt;
+        if (f.x < -6) f.x = W + 6; if (f.x > W + 6) f.x = -6;
+        if (f.y < -6) f.y = H + 6; if (f.y > H + 6) f.y = -6;
+        var al = Math.max(0.05, f.a + cc.amp * Math.sin(S.t * f.tw + f.ph)) * K;
+        ctx.beginPath(); ctx.arc(f.x, f.y, f.r, 0, TAU);
+        ctx.fillStyle = rgba(f.tint, Math.min(1, al)); ctx.fill();
+      }
+    } else if (kind === "firefly") {
+      /* 萤火虫版：暗处游走 -> 亮起 -> 明灭闪烁 -> 熄灭 -> 再暗处游走；鼠标靠近避让 */
+      for (i = 0; i < S.parts.length; i++) {
+        f = S.parts[i]; if (f.u > K) continue;
+        f.ang += rand(-1, 1) * 1.8 * dt;
+        f.x += Math.cos(f.ang) * f.sp * dt; f.y += Math.sin(f.ang) * f.sp * dt;
+        var dx = f.x - mouse.x, dy = f.y - mouse.y, dd = Math.hypot(dx, dy);
+        if (dd < cc.repel && dd > 0.01) { var push = (cc.repel - dd) / cc.repel * 34 * dt; f.x += dx / dd * push * 8; f.y += dy / dd * push * 8; }
+        if (f.x < -8) f.x = W + 8; if (f.x > W + 8) f.x = -8;
+        if (f.y < -8) f.y = H + 8; if (f.y > H + 8) f.y = -8;
+        f.ct -= dt;
+        if (f.ct <= 0) {
+          if (f.cyc === "dark") { f.cyc = "in"; f.dur = 0.7; }
+          else if (f.cyc === "in") { f.cyc = "lit"; f.dur = rand(1.2, 3); }
+          else if (f.cyc === "lit") { f.cyc = "out"; f.dur = 0.9; }
+          else { f.cyc = "dark"; f.dur = rand(1.5, 4); }
+          f.ct = f.dur;
+        }
+        var fa = 0;
+        if (f.cyc === "in") fa = 1 - f.ct / f.dur;
+        else if (f.cyc === "lit") fa = 0.72 + 0.28 * Math.sin(S.t * 7 + f.fl);
+        else if (f.cyc === "out") fa = f.ct / f.dur;
+        fa *= K;
+        if (fa <= 0.02) continue;
+        ctx.shadowBlur = 12 * SET.glow; ctx.shadowColor = rgba(f.tint, fa);
+        ctx.beginPath(); ctx.arc(f.x, f.y, f.r, 0, TAU);
+        ctx.fillStyle = rgba(f.tint, Math.min(1, fa)); ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+    } else if (kind === "starC") {
+      for (i = 0; i < S.parts.length; i++) {
+        f = S.parts[i];
+        f.x += f.vx * dt; f.y += f.vy * dt;
+        var mx = mouse.x - f.x, my = mouse.y - f.y, md = Math.hypot(mx, my);
+        if (md < cc.attract && md > 0.01) { var pull = (1 - md / cc.attract) * 10 * dt; f.x += mx / md * pull * 6; f.y += my / md * pull * 6; }
+        if (f.x < -6) f.x = W + 6; if (f.x > W + 6) f.x = -6;
+        if (f.y < -6) f.y = H + 6; if (f.y > H + 6) f.y = -6;
+      }
+      var bc = baseCol();
+      for (i = 0; i < S.parts.length; i++) for (j = i + 1; j < S.parts.length; j++) {
+        var a1 = S.parts[i], a2 = S.parts[j];
+        if (a1.u > K || a2.u > K) continue;
+        var dd2 = Math.hypot(a1.x - a2.x, a1.y - a2.y);
+        if (dd2 < cc.link) {
+          ctx.beginPath(); ctx.moveTo(a1.x, a1.y); ctx.lineTo(a2.x, a2.y);
+          ctx.strokeStyle = rgba(bc, (1 - dd2 / cc.link) * 0.14 * K); ctx.lineWidth = 0.6; ctx.stroke();
+        }
+      }
+      for (i = 0; i < S.parts.length; i++) {
+        var s2 = S.parts[i]; if (s2.u > K) continue;
+        var dm = Math.hypot(s2.x - mouse.x, s2.y - mouse.y);
+        if (dm < cc.attract) {
+          ctx.beginPath(); ctx.moveTo(s2.x, s2.y); ctx.lineTo(mouse.x, mouse.y);
+          ctx.strokeStyle = rgba(bc, (1 - dm / cc.attract) * 0.2 * K); ctx.lineWidth = 0.6; ctx.stroke();
+        }
+        ctx.beginPath(); ctx.arc(s2.x, s2.y, s2.r, 0, TAU);
+        ctx.fillStyle = rgba(s2.tint, s2.a * K); ctx.fill();
+      }
+    } else if (kind === "meteor") {
+      var col7 = baseCol();
+      var dir = { x: 0.82, y: 0.57 }; /* 与徽章流星一致的 215 度右下流向 */
+      if (S.t >= S.next) {
+        S.next = S.t + rand(cc.every[0], cc.every[1]);
+        if (Math.random() < K) {
+          var bst = cc.burst || 1, nb = Math.floor(bst) + (Math.random() < (bst % 1) ? 1 : 0);
+          for (var bi = 0; bi < nb; bi++) {
+            var startLeft = Math.random() < 0.5;
+            S.parts.push({ x: (startLeft ? rand(-30, W * 0.45) : rand(W * 0.1, W * 0.7)) + rand(-50, 50), y: (startLeft ? rand(0, H * 0.3) : rand(-30, -6)) - rand(0, 30), a: 0 });
+          }
+        }
+      }
+      for (i = S.parts.length - 1; i >= 0; i--) {
+        var m = S.parts[i];
+        m.x += dir.x * cc.v * dt; m.y += dir.y * cc.v * dt;
+        if (m.a < 1) m.a = Math.min(1, m.a + dt * 4);
+        if (m.x - cc.tail > W + 30 || m.y > H + 30) { S.parts.splice(i, 1); continue; }
+        var tx = m.x - dir.x * cc.tail, ty = m.y - dir.y * cc.tail;
+        var g2 = ctx.createLinearGradient(m.x, m.y, tx, ty);
+        g2.addColorStop(0, rgba(col7, 0.85 * m.a * K)); g2.addColorStop(1, rgba(col7, 0));
+        ctx.beginPath(); ctx.moveTo(m.x, m.y); ctx.lineTo(tx, ty);
+        ctx.strokeStyle = g2; ctx.lineWidth = 1.6; ctx.stroke();
+        if (cc.glow) { ctx.shadowBlur = cc.glow * SET.glow; ctx.shadowColor = rgba(col7, 0.9 * K); }
+        ctx.beginPath(); ctx.arc(m.x, m.y, cc.head, 0, TAU);
+        ctx.fillStyle = rgba(col7, 0.95 * m.a * K); ctx.fill();
+        ctx.shadowBlur = 0;
+        if (cc.embers && Math.random() < 0.5 * K) {
+          S.embers.push({ x: m.x, y: m.y, vx: rand(-14, 14), vy: rand(-10, 16), life: rand(0.4, 0.8), t0: S.t });
+        }
+      }
+      for (j = S.embers.length - 1; j >= 0; j--) {
+        var e = S.embers[j], age = S.t - e.t0;
+        if (age > e.life) { S.embers.splice(j, 1); continue; }
+        e.x += e.vx * dt; e.y += e.vy * dt;
+        ctx.beginPath(); ctx.arc(e.x, e.y, 0.9, 0, TAU);
+        ctx.fillStyle = rgba(col7, (1 - age / e.life) * 0.6 * K); ctx.fill();
+      }
+    }
+  }
+
+  function frame(now) {
+    S.raf = requestAnimationFrame(frame);
+    var dt = Math.min(0.05, (now - S.last) / 1000);
+    S.last = now; S.t += dt;
+    if (S.phase === "in") { S.k = Math.min(1, S.k + dt / 4); if (S.k >= 1) S.phase = "run"; }
+    else if (S.phase === "run" && S.t >= S.endAt) S.phase = "out";
+    else if (S.phase === "out") {
+      S.k = Math.max(0, S.k - dt / 5);
+      if (S.k <= 0) { stopFx(); setTimeout(roll, 1500); return; }
+    }
+    ctx.clearRect(0, 0, W, H);
+    step(dt);
+  }
+
+  function startFx(key) {
+    S.key = key; S.cfg = CFG[key];
+    S.t = 0; S.k = 0; S.phase = "in"; S.endAt = 7 * 60; S.next = 1;
+    makeParts();
+    S.last = performance.now();
+    cancelAnimationFrame(S.raf);
+    S.raf = requestAnimationFrame(frame);
+  }
+  function stopFx() {
+    S.phase = "idle";
+    cancelAnimationFrame(S.raf);
+    ctx.clearRect(0, 0, W, H);
+  }
+  function roll() {
+    var h = new Date().getHours();
+    var night = h >= 18 || h < 7;
+    var pool = [];
+    Object.keys(CFG).forEach(function (k) {
+      var w = CFG[k].when;
+      if (w === "both" || (night ? w === "night" : w === "day")) pool.push(k);
+    });
+    if (SET.enabled && localStorage.getItem("coco_fx_off") !== "1" && pool.length && Math.random() < (SET.prob || 0.35)) startFx(pick(pool));
+  }
+  window.FX = {
+    play: function (k) { if (CFG[k]) startFx(k); },
+    stop: stopFx,
+    roll: roll,
+    state: function () { return { phase: S.phase, key: S.key, k: S.k }; },
+    names: Object.keys(CFG)
+  };
+  var fxm = /[?&]fx=([a-zA-Z]+)/.exec(location.search);
+  if (fxm && CFG[fxm[1]]) startFx(fxm[1]); else roll();
+})();
+
+/* ================= 粒子背景：管理设置 + 访客调节球 ================= */
+var FXLIST = [
+  { k: "snowA", n: "雪·A", i: "❄", w: "both" }, { k: "snowC", n: "雪·C", i: "❅", w: "both" },
+  { k: "rainA", n: "雨·A", i: "🌧", w: "both" }, { k: "rainC", n: "雨·C", i: "🌦", w: "both" },
+  { k: "breezeB", n: "风·B", i: "🍃", w: "both" }, { k: "breezeC", n: "风·C", i: "〰️", w: "day" },
+  { k: "cloudA", n: "云·A", i: "☁️", w: "day" }, { k: "cloudB", n: "云·B", i: "🌥", w: "day" },
+  { k: "starA", n: "星光·A", i: "✦", w: "night" }, { k: "starB", n: "萤火·B", i: "✨", w: "night" },
+  { k: "starC", n: "星尘·C", i: "✧", w: "night" }, { k: "meteorB", n: "流星·B", i: "☄", w: "night" },
+  { k: "meteorC", n: "流星·C", i: "💫", w: "night" }
+];
+var FXW = { both: "全天", day: "白天", night: "夜晚" };
+var FXPH = { idle: "自动待机", in: "淡入", run: "播放中", out: "淡出" };
+
+function applyFxSettings() {
+  if (!window.FXSET) return;
+  var f = store.fx || {};
+  window.FXSET.prob = (f.prob != null) ? f.prob : 0.35;
+  window.FXSET.density = f.density || 1;
+  window.FXSET.glow = (f.glow != null) ? f.glow : 1;
+  window.FXSET.enabled = f.enabled !== false;
+}
+function updFxLabels() {
+  $("fxProbV").textContent = $("fxProb").value + "%";
+  $("fxDenV").textContent = (+$("fxDen").value).toFixed(1) + "×";
+  $("fxGlowV").textContent = (+$("fxGlow").value).toFixed(1) + "×";
+}
+function loadFxPanel() {
+  var f = store.fx || {};
+  $("fxProb").value = Math.round(((f.prob != null) ? f.prob : 0.35) * 100);
+  $("fxDen").value = f.density || 1;
+  $("fxGlow").value = (f.glow != null) ? f.glow : 1;
+  $("fxEnabled").checked = f.enabled !== false;
+  updFxLabels();
+}
+["fxProb", "fxDen", "fxGlow"].forEach(function (id) { $(id).addEventListener("input", updFxLabels); });
+$("fxSave").addEventListener("click", function () {
+  store.fx = { prob: (+$("fxProb").value) / 100, density: +$("fxDen").value, glow: +$("fxGlow").value, enabled: $("fxEnabled").checked };
+  saveStore(); applyFxSettings();
+  toast(T("粒子设置已保存", "FX settings saved"));
+});
+
+/* --- 访客调节球 --- */
+(function buildFxDock() {
+  var grid = $("fxdGrid");
+  if (!grid) return;
+  FXLIST.forEach(function (o) {
+    var b = document.createElement("button");
+    b.className = "fxd-btn";
+    b.setAttribute("data-fx", o.k);
+    b.innerHTML = '<span class="i">' + o.i + '</span><span>' + o.n + '</span><span class="w">' + FXW[o.w] + '</span>';
+    b.addEventListener("click", function () { if (window.FX) window.FX.play(o.k); });
+    grid.appendChild(b);
+  });
+  var auto = $("fxdAuto");
+  auto.checked = localStorage.getItem("coco_fx_off") !== "1";
+  auto.addEventListener("change", function () {
+    if (auto.checked) { localStorage.removeItem("coco_fx_off"); if (window.FX) window.FX.roll(); }
+    else { localStorage.setItem("coco_fx_off", "1"); if (window.FX) window.FX.stop(); }
+  });
+  $("fxdStop").addEventListener("click", function () { if (window.FX) window.FX.stop(); });
+  $("fxdBall").addEventListener("click", function () {
+    if ($("fxdBall").getAttribute("data-dragged") === "1") { $("fxdBall").removeAttribute("data-dragged"); return; }
+    $("fxDock").classList.toggle("open");
+  });
+  setInterval(function () {
+    var st = $("fxdStatus"), icon = $("fxdIcon");
+    if (!st || !window.FX) return;
+    var s = window.FX.state(), it = null;
+    FXLIST.forEach(function (o) { if (o.k === s.key) it = o; });
+    if (s.phase === "idle") { st.textContent = T("当前：自动待机", "Status: auto standby"); if (icon) icon.textContent = "✦"; }
+    else {
+      st.textContent = T("当前：", "Now: ") + (it ? it.n : s.key) + " · " + T(FXPH[s.phase] || s.phase, s.phase);
+      if (icon && it) icon.textContent = it.i;
+    }
+  }, 1000);
+})();
+
+/* 天气球自由拖动（以球体为边界钳制；位置记忆；右半屏面板翻转；贴边才半隐） */
+(function () {
+  var dock = $("fxDock"), ball = $("fxdBall"), panel = $("fxdPanel");
+  if (!dock || !ball || !panel) return;
+  var dragging = false, moved = false, sx = 0, sy = 0, ox = 0, oy = 0;
+  function applyPos(x, y) {
+    x = Math.max(0, Math.min(window.innerWidth - 56, x));
+    y = Math.max(0, Math.min(window.innerHeight - 56, y));
+    var flip = x > window.innerWidth / 2 - 28;
+    dock.classList.toggle("fxd-flip", flip);
+    dock.classList.toggle("fxd-edge-l", !flip && x <= 4);
+    dock.classList.toggle("fxd-edge-r", flip && x >= window.innerWidth - 60);
+    /* 翻转时球位于容器右端：容器左缘 = 球x - 面板宽 - 间隙 */
+    dock.style.left = (flip ? x - panel.offsetWidth - 10 : x) + "px";
+    dock.style.top = y + "px";
+    dock.style.transform = "none";
+  }
+  try {
+    var sp = JSON.parse(localStorage.getItem("coco_fxdock_pos") || "null");
+    if (sp && typeof sp.x === "number" && typeof sp.y === "number") applyPos(sp.x, sp.y);
+    else dock.classList.add("fxd-edge-l");
+  } catch (e) { dock.classList.add("fxd-edge-l"); }
+  ball.addEventListener("pointerdown", function (e) {
+    dragging = true; moved = false;
+    sx = e.clientX; sy = e.clientY;
+    dock.classList.add("open", "fxd-drag"); /* 拖动中清零球体位移，坐标即真实位置 */
+    var br = ball.getBoundingClientRect();
+    ox = br.left; oy = br.top;
+    if (ball.setPointerCapture) { try { ball.setPointerCapture(e.pointerId); } catch (err) {} }
+  });
+  ball.addEventListener("pointermove", function (e) {
+    if (!dragging) return;
+    var dx = e.clientX - sx, dy = e.clientY - sy;
+    if (Math.abs(dx) + Math.abs(dy) > 5) moved = true;
+    if (moved) applyPos(ox + dx, oy + dy);
+  });
+  ball.addEventListener("pointerup", function () {
+    if (!dragging) return;
+    dragging = false;
+    if (moved) {
+      ball.setAttribute("data-dragged", "1");
+      var br = ball.getBoundingClientRect();
+      localStorage.setItem("coco_fxdock_pos", JSON.stringify({ x: Math.round(br.left), y: Math.round(br.top) }));
+      setTimeout(function () { dock.classList.remove("open"); }, 500);
+    }
+    dock.classList.remove("fxd-drag");
+  });
+  window.addEventListener("resize", function () {
+    try {
+      var sp2 = JSON.parse(localStorage.getItem("coco_fxdock_pos") || "null");
+      if (sp2) applyPos(sp2.x, sp2.y);
+    } catch (e) {}
+  });
+})();
+
+loadFxPanel();
+applyFxSettings();
 
 applyTheme();
 applyLang();
