@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="description" content="CoCo的个人主页" />
 <title>CoCo · 个人主页</title>
+<!-- 数据文件（可选）：在管理模式里点「导出数据文件」生成 site-data.js，放到本文件同目录，
+     站点就会优先读取它。这样即使版本更新、换浏览器或清空了浏览器数据，你的调整也不会丢。 -->
+<script src="site-data.js"></script>
 <style>
   :root {
     --bg: #0a0b0d;
@@ -738,7 +741,7 @@
   #fxLayer { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
 /* ===== 左侧页边粒子调节球（360 加速球式吸附，悬停展开） ===== */
   #fxDock { position: fixed; left: 0; top: 50%; transform: translateY(-50%); z-index: 45; display: flex; align-items: center; gap: 10px; }
-  .fxd-ball { width: 56px; height: 56px; border-radius: 50%; background: var(--card); border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; font-size: 22px; cursor: grab; transform: none; opacity: .8; transition: transform .28s ease, opacity .28s; box-shadow: 4px 6px 18px rgba(0,0,0,.25); }
+  .fxd-ball { width: 56px; height: 56px; border-radius: 50%; background: var(--card); border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; font-size: 22px; cursor: grab; transform: none; opacity: .8; position: relative; z-index: 2; transition: transform .28s ease, opacity .28s; box-shadow: 4px 6px 18px rgba(0,0,0,.25); }
   .fxd-panel { width: 236px; max-height: min(200px, 40vh); overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--line) transparent; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 12px; opacity: 0; transform: translateX(-18px); pointer-events: none; transition: .28s ease; box-shadow: 0 14px 34px rgba(0,0,0,.32); }
   .fxd-panel::-webkit-scrollbar { width: 6px; }
   .fxd-panel::-webkit-scrollbar-thumb { background: var(--line); border-radius: 3px; }
@@ -747,11 +750,11 @@
   #fxDock:hover .fxd-panel, #fxDock.open .fxd-panel { opacity: 1; transform: translateX(0); pointer-events: auto; }
   .fxd-ball:active { cursor: grabbing; }
   #fxDock.fxd-flip { flex-direction: row-reverse; }
-  #fxDock.fxd-edge-l .fxd-ball { transform: translateX(-38px); }
-  #fxDock.fxd-edge-r .fxd-ball { transform: translateX(38px); }
-  #fxDock.fxd-edge-l:hover .fxd-ball, #fxDock.fxd-edge-l.open .fxd-ball { transform: translateX(10px); }
-  #fxDock.fxd-edge-r:hover .fxd-ball, #fxDock.fxd-edge-r.open .fxd-ball { transform: translateX(-10px); }
-  #fxDock.fxd-drag .fxd-ball { transform: none !important; }
+  #fxDock.fxd-edge-l .fxd-stack { transform: translateX(-38px); }
+  #fxDock.fxd-edge-r .fxd-stack { transform: translateX(38px); }
+  #fxDock.fxd-edge-l:hover .fxd-stack, #fxDock.fxd-edge-l.open .fxd-stack { transform: translateX(10px); }
+  #fxDock.fxd-edge-r:hover .fxd-stack, #fxDock.fxd-edge-r.open .fxd-stack { transform: translateX(-10px); }
+  #fxDock.fxd-drag .fxd-stack { transform: none !important; }
   .fxd-title { font-size: 11px; letter-spacing: 1.5px; color: var(--muted); margin-bottom: 6px; }
   .fxd-status { font-size: 12.5px; margin-bottom: 8px; }
   .fxd-auto { display: flex; gap: 6px; align-items: center; font-size: 12.5px; color: var(--muted); margin-bottom: 10px; cursor: pointer; }
@@ -763,6 +766,24 @@
   .fxd-stop { margin-top: 10px; width: 100%; padding: 7px; background: var(--card-2); border: 1px solid var(--line); border-radius: 9px; color: var(--muted); font-size: 12.5px; cursor: pointer; font-family: inherit; }
   .fxd-stop:hover { color: var(--danger); border-color: var(--danger); }
   @media (max-width: 640px) { .fxd-panel { width: 200px; } }
+/* ===== 悬浮球分身（背景切换 / 音乐占位） ===== */
+  .fxd-stack { position: relative; width: 56px; height: 56px; flex: 0 0 56px; transition: transform .28s ease; }
+  .fxd-sat { position: absolute; left: 0; top: 0; width: 56px; height: 56px; border-radius: 50%; background: var(--card); border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; font-family: inherit; padding: 0; opacity: 0; transform: translateY(0) scale(.3); pointer-events: none; transition: transform .3s cubic-bezier(.25,.9,.3,1.2), opacity .22s ease; z-index: 1; box-shadow: 4px 6px 18px rgba(0,0,0,.22); }
+  #fxDock:hover .fxd-sat.above, #fxDock.open .fxd-sat.above { opacity: 1; transform: translateY(-64px) scale(1); pointer-events: auto; }
+  #fxDock:hover .fxd-sat.below, #fxDock.open .fxd-sat.below { opacity: 1; transform: translateY(64px) scale(1); pointer-events: auto; }
+  .fxd-sat:hover { border-color: var(--accent); }
+  .fxd-sat.swap-in { transform: translateY(0) scale(1.08) !important; opacity: 1 !important; z-index: 3; pointer-events: none; }
+  .fxd-stack.swap-out .fxd-ball { transform: translateY(var(--swapY, 64px)) scale(.45) !important; opacity: 0; }
+  .fxd-pal { display: grid; grid-template-columns: repeat(10, 1fr); grid-auto-rows: 17px; gap: 3px; margin: 2px 0 10px; }
+  .fxd-sw { border: 1px solid rgba(128,128,128,.4); border-radius: 4px; cursor: pointer; padding: 0; }
+  .fxd-sw:hover { transform: scale(1.12); }
+  .fxd-sw.sel { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .fxd-action { width: 100%; padding: 7px; background: var(--card-2); border: 1px solid var(--line); border-radius: 9px; color: var(--text); font-size: 12.5px; cursor: pointer; font-family: inherit; }
+  .fxd-action:hover { border-color: var(--accent); color: var(--accent); }
+  .fxd-rec { margin-top: 9px; font-size: 12px; color: var(--muted); }
+  .fxd-rec a { color: var(--accent); cursor: pointer; text-decoration: underline; }
+/* 纯色模式：背景图整体淡出，露出 body 底色（规则放最后，压住 body.light 的透明度） */
+  body.bg-solid #bgLayer { opacity: 0; }
 </style>
 </head>
 <body>
@@ -804,13 +825,33 @@
 <div id="bgLayer"><div class="bgl-img" id="bgA"></div><div class="bgl-img" id="bgB"></div></div>
 <canvas id="fxLayer" aria-hidden="true"></canvas>
 <div id="fxDock">
-  <div class="fxd-ball" id="fxdBall" title="粒子天气"><span id="fxdIcon">✦</span></div>
+  <div class="fxd-stack" id="fxdStack">
+    <button class="fxd-sat above" id="fxdSatA" type="button" title="背景切换">🎨</button>
+    <button class="fxd-sat below" id="fxdSatB" type="button" title="音乐播放（下版本）">🎵</button>
+    <div class="fxd-ball" id="fxdBall" title="粒子天气"><span id="fxdIcon">✦</span></div>
+  </div>
   <div class="fxd-panel" id="fxdPanel">
     <div class="fxd-title mono">粒子天气 · FX</div>
     <div class="fxd-status" id="fxdStatus">当前：自动待机</div>
     <label class="fxd-auto"><input type="checkbox" id="fxdAuto"> 自动粒子（刷新时按概率出现）</label>
     <div class="fxd-grid" id="fxdGrid"></div>
     <button class="fxd-stop" id="fxdStop">停止当前效果</button>
+  </div>
+  <div class="fxd-panel" id="fxdPanelBg" hidden>
+    <div class="fxd-title mono">背景切换 · BG</div>
+    <label class="fxd-auto"><input type="radio" name="fxBgMode" id="bgmPal"> 调色板</label>
+    <div class="fxd-pal" id="bgPal" style="display:none"></div>
+    <label class="fxd-auto"><input type="radio" name="fxBgMode" id="bgmSolid"> 纯色模式</label>
+    <label class="fxd-auto"><input type="radio" name="fxBgMode" id="bgmImg" checked> 背景图模式（默认）</label>
+    <div id="bgImgBox">
+      <button class="fxd-action" id="bgRefresh" type="button">🎲 刷新背景图</button>
+      <div class="fxd-rec">没有想要的？<a id="bgRecommend">为我推荐一张</a></div>
+    </div>
+  </div>
+  <div class="fxd-panel" id="fxdPanelMusic" hidden>
+    <div class="fxd-title mono">音乐播放 · MUSIC</div>
+    <div class="fxd-status" style="color:var(--muted)">🎵 功能占位 — 下个版本上线，敬请期待</div>
+    <button class="fxd-stop" type="button" disabled style="opacity:.45; cursor:not-allowed">▶ 播放（占位）</button>
   </div>
 </div>
   <div id="neonCursor" aria-hidden="true"></div>
@@ -890,7 +931,7 @@
             <div class="spec-row"><span class="spec-k">STATUS / 状态</span><span class="spec-v on">● ONLINE</span></div>
             <div class="spec-row"><span class="spec-k">TYPE / 类型</span><span class="spec-v" data-i18n="specType">个人主页</span></div>
             <div class="spec-row"><span class="spec-k">OWNER / 站长</span><span class="spec-v" id="specOwner">CoCo</span></div>
-            <div class="spec-row"><span class="spec-k">SINCE / 建站</span><span class="spec-v">2026</span></div>
+            <div class="spec-row"><span class="spec-k">SINCE / 建站</span><span class="spec-v" id="specSince">2026.01.01</span></div>
             <div class="spec-row"><span class="spec-k">UPDATED / 更新</span><span class="spec-v" id="specUpdated">—</span></div>
             <div class="spec-row"><span class="spec-k">LOCATION / 位置</span><span class="spec-v" data-i18n="specLoc">北回归线附近</span></div>
           </div>
@@ -942,10 +983,28 @@
             <label class="muted" style="display:block;margin-bottom:5px" data-i18n="lblIntro">自我介绍</label>
             <textarea id="pfIntro" rows="4"></textarea>
           </div>
+          <div>
+            <label class="muted" style="display:block;margin-bottom:5px" data-i18n="lblSince">建站日期（精确到天）</label>
+            <input type="date" id="pfSince">
+          </div>
           <div id="pfInfo"></div>
           <div style="display:flex;gap:10px">
             <button class="btn sm" id="pfSave" data-i18n="saveProfile">保存简介</button>
           </div>
+        </div>
+      </div>
+
+      <div class="admin-panel" id="dataPanel">
+        <div class="admin-tag" data-i18n="adminData">管理员 · 数据备份（版本更新不丢）</div>
+        <div class="formgrid" style="margin-top:12px">
+          <p class="note" data-i18n="dataHint">你在管理模式下的所有调整都保存在本机「浏览器存储」里，换新版本（替换 index.html）不会清空它们；但换浏览器、换设备或清理浏览器数据时可能会丢。点「导出数据文件」，把下载的 site-data.js 放到 index.html 同目录，数据就会随站点长期保留，以后每个新版本都会自动读取它。</p>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn sm" id="dataExportFile" data-i18n="dataExportFile">导出数据文件 site-data.js</button>
+            <button class="btn sm ghost" id="dataExportJson" data-i18n="dataExportJson">导出 JSON 备份</button>
+            <button class="btn sm ghost" id="dataImportBtn" data-i18n="dataImportBtn">导入数据文件</button>
+            <input type="file" id="dataImportFile" accept=".json,.js,application/json,text/javascript" style="display:none">
+          </div>
+          <p class="note" id="dataState" style="margin-top:4px"></p>
         </div>
       </div>
 
@@ -961,7 +1020,7 @@
             <button class="btn sm ghost" id="bgClear" data-i18n="bgClear">全部清除</button>
           </div>
           <div id="bgThumbs" style="display:flex;gap:8px;flex-wrap:wrap"></div>
-          <p class="note" data-i18n="bgHint">最多 16 张；每次打开网页随机选一张，之后每 2~3 分钟自动淡入淡出切换。上传本地图片会自动裁掉黑边并压缩优化（不限原始大小，仅保存在当前浏览器），也可直接粘贴图片链接。</p>
+          <p class="note" data-i18n="bgHint">最多 25 张；每次打开网页随机选一张，之后每 2~3 分钟自动淡入淡出切换。上传本地图片会自动裁掉黑边并压缩优化（不限原始大小，仅保存在当前浏览器），也可直接粘贴图片链接。</p>
         </div>
       </div>
 
@@ -1267,11 +1326,26 @@
 
 <script>
 "use strict";
-/* ================= 数据层（localStorage 持久化） ================= */
+/* ================= 数据层（localStorage 持久化 + 站点数据文件） =================
+   ★★ 版本更新安全守则（改这个文件时请务必遵守，否则会重置用户的调整）★★
+   1. LS_KEY 永远不要改名。改 key 等于把所有用户数据清空。
+   2. 新增字段只在 defaultStore() 里写默认值，loadStore() 会用默认值补齐缺失字段。
+   3. 绝对不要在启动代码里用硬编码值覆盖 store 里已有的用户数据。
+      （历史踩坑：曾在这里强制把名字改回 CoCo、强制加回「联系地址」，
+        结果用户在管理模式下改的东西每次版本更新都被重置。）
+   4. 用户数据以「最新的那一份」为准，优先级：
+      site-data.js（放在 index.html 同目录的数据文件）> localStorage 主存档 > 本地自动备份。
+*/
 var LS_KEY = "lujiaxi_site_v1";
+var LS_BACKUP = "lujiaxi_site_v1_backup";   // 自动备份：主存档被清/损坏时可回滚
 var LS_ADMIN = "lujiaxi_admin_pass";
 var LS_SESSION = "lujiaxi_admin_session";
 var LS_VID = "lujiaxi_vid";
+var DATA_SCHEMA = 2;                        // 数据结构版本号（只在结构大改时递增）
+
+/* 随站点一起走的用户数据文件（site-data.js），可选 */
+var FILE_DATA = null;
+try { if (window.__SITE_DATA__ && typeof window.__SITE_DATA__ === "object") FILE_DATA = window.__SITE_DATA__; } catch (e) {}
 
 function defaultStore() {
   return {
@@ -1280,6 +1354,7 @@ function defaultStore() {
       tagline: "一个非常奇怪，喜欢胡思乱想的 bro。",
       badges: ["全日制大学生", "正在努力适应英语授课"],
       intro: "你好，我是 CoCo。一个全日制大学生，正在努力适应英语授课。\n我喜欢漫画和足球，脑子里随时都在胡思乱想，行为举止也有点怪异、动作笨拙——但我觉得这就是我。\n最近在学新工科 + AI，方向是脑机接口。欢迎来到我的小站，随便逛逛，也可以在下面的意见箱给我留建议。",
+      since: "2026-01-01",
       info: [
         { k: "身份", v: "全日制大学生" },
         { k: "兴趣", v: "漫画 · 足球 · 随心所欲" },
@@ -1309,41 +1384,58 @@ function defaultStore() {
   };
 }
 
-function loadStore() {
+function readLocal(key) {
   try {
-    var raw = localStorage.getItem(LS_KEY);
-    if (!raw) return defaultStore();
-    var d = JSON.parse(raw);
-    var base = defaultStore();
-    return mergeStore(base, d);
-  } catch (e) { return defaultStore(); }
+    var raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) { return null; }
 }
+
+function loadStore() {
+  var cands = [];
+  if (FILE_DATA) cands.push(FILE_DATA);          // 站点数据文件（最稳，跨版本/跨浏览器）
+  var main = readLocal(LS_KEY); if (main) cands.push(main);
+  var bak = readLocal(LS_BACKUP); if (bak) cands.push(bak);
+  if (!cands.length) return defaultStore();
+  /* 以「最后保存时间」最新的那一份为准 */
+  cands.sort(function (a, b) { return ((b && b._savedAt) || 0) - ((a && a._savedAt) || 0); });
+  return mergeStore(defaultStore(), cands[0]);
+}
+
+/* 安全合并：默认值只补用户数据里「没有」的字段，绝不覆盖用户已经改好的内容 */
 function mergeStore(base, d) {
   var out = JSON.parse(JSON.stringify(base));
-  ['profile','contacts','chat','works'].forEach(function(key){
-    if (d[key] && typeof d[key] === 'object') out[key] = Object.assign({}, out[key], d[key]);
+  if (!d || typeof d !== "object") return out;
+  ['profile','contacts','chat','works','motto','fx'].forEach(function (key) {
+    if (d[key] && typeof d[key] === "object" && !Array.isArray(d[key])) {
+      Object.keys(d[key]).forEach(function (k) {
+        if (d[key][k] !== undefined && d[key][k] !== null) out[key][k] = d[key][k];
+      });
+    }
   });
   if (d.profile && Array.isArray(d.profile.info)) out.profile.info = d.profile.info;
   if (d.profile && Array.isArray(d.profile.badges)) out.profile.badges = d.profile.badges;
   ['casual','formal'].forEach(function(k){ if (d.contacts && Array.isArray(d.contacts[k])) out.contacts[k] = d.contacts[k]; });
   ['visitors','publicAnon'].forEach(function(k){ if (d.chat && Array.isArray(d.chat[k])) out.chat[k] = d.chat[k]; });
   ['tt','results'].forEach(function(k){ if (d.works && Array.isArray(d.works[k])) out.works[k] = d.works[k]; });
-  if (Array.isArray(d.moments)) out.moments = d.moments;
-  if (Array.isArray(d.feedback)) out.feedback = d.feedback;
-  if (Array.isArray(d.links)) out.links = d.links;
-  if (d.motto && typeof d.motto === 'object') out.motto = Object.assign({}, out.motto, d.motto);
-  if (Array.isArray(d.qa)) out.qa = d.qa;
-  if (d.fx && typeof d.fx === "object") out.fx = Object.assign({}, out.fx, d.fx);
+  ['moments','feedback','links','qa'].forEach(function(k){ if (Array.isArray(d[k])) out[k] = d[k]; });
+  if (typeof d._savedAt === "number") out._savedAt = d._savedAt;
+  out._schema = DATA_SCHEMA;
   return out;
 }
-function saveStore() { localStorage.setItem(LS_KEY, JSON.stringify(store)); }
 
-var store = loadStore();
-if (store.profile.name === "吕佳熹") { store.profile.name = "CoCo"; saveStore(); }
-if (!store.profile.info.some(function(it){ return it.k === "联系地址"; })) {
-  store.profile.info.push({ k: "联系地址", v: "pf6917y9@outlook.com" });
-  saveStore();
+function saveStore() {
+  store._schema = DATA_SCHEMA;
+  store._savedAt = Date.now();
+  var json;
+  try { json = JSON.stringify(store); } catch (e) { return; }
+  /* 主存档 + 自动备份各写一份；任何一份写失败都不影响另一份 */
+  try { localStorage.setItem(LS_KEY, json); } catch (e) {}
+  try { localStorage.setItem(LS_BACKUP, json); } catch (e) {}
 }
+
+/* 载入用户数据。此处不做任何「强制改回默认值」的操作 —— 那正是以前版本更新会重置调整的原因 */
+var store = loadStore();
 var am = sessionStorage.getItem(LS_SESSION) === "1";
 var curPage = "home";
 var worksTab = "tt";
@@ -1457,6 +1549,15 @@ function renderLinks() {
   }).join("");
 }
 
+/* 建站日期：统一显示到天（2026.01.01） */
+function fmtSince(s) {
+  s = String(s == null ? "" : s).trim();
+  var m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if (m) return m[1] + "." + ("0" + m[2]).slice(-2) + "." + ("0" + m[3]).slice(-2);
+  if (/^\d{4}$/.test(s)) return s;     // 旧数据只有年份时按原样显示
+  return s || "—";
+}
+
 function renderHero() {
   $("heroName").textContent = trData(store.profile.name);
   $("heroTag").textContent = "§ " + trData(store.profile.tagline);
@@ -1468,6 +1569,7 @@ function renderHero() {
     return '<span class="badge'+(i%2===1?" blue":"")+'"><span class="bt">'+esc(trData(b))+"</span>"+meteors+"</span>";
   }).join("");
   if ($("specOwner")) $("specOwner").textContent = trData(store.profile.name);
+  if ($("specSince")) $("specSince").textContent = fmtSince(store.profile.since);
   if ($("specUpdated")) {
     var d = new Date();
     $("specUpdated").textContent = d.getFullYear() + "." + String(d.getMonth()+1).padStart(2,"0") + "." + String(d.getDate()).padStart(2,"0");
@@ -1488,6 +1590,10 @@ function renderProfileForm() {
   $("pfName").value = store.profile.name;
   $("pfTag").value = store.profile.tagline;
   $("pfIntro").value = store.profile.intro || "";
+  if ($("pfSince")) {
+    var sv = String(store.profile.since || "");
+    $("pfSince").value = /^\d{4}-\d{2}-\d{2}$/.test(sv) ? sv : "";
+  }
   $("pfInfo").innerHTML = store.profile.info.map(function(it,i){
     return '<label class="muted" style="display:block;margin:8px 0 4px">'+esc(it.k)+'</label>'+
       '<input type="text" data-pfi="'+i+'" value="'+esc(it.v)+'">';
@@ -1637,6 +1743,7 @@ function renderAdminUI() {
   $("adminBtn").classList.toggle("on", am);
   $("adminBtn").textContent = am ? T("👤 退出管理","👤 Exit Admin") : T("⚙ 管理","⚙ Admin");
   renderContacts();
+  renderDataState();
 }
 
 /* ================= 管理员验证 ================= */
@@ -1736,12 +1843,72 @@ $("pfSave").addEventListener("click", function(){
   store.profile.name = $("pfName").value.trim() || store.profile.name;
   store.profile.tagline = $("pfTag").value.trim();
   store.profile.intro = $("pfIntro").value;
+  if ($("pfSince") && $("pfSince").value) store.profile.since = $("pfSince").value;
   document.querySelectorAll("[data-pfi]").forEach(function(inp){
     var i = +inp.getAttribute("data-pfi");
     if (store.profile.info[i]) store.profile.info[i].v = inp.value;
   });
-  saveStore(); renderHero(); renderInfo();
+  saveStore(); renderHero(); renderInfo(); renderDataState();
   toast(T("简介已保存","Profile saved"));
+});
+
+/* ===== 数据备份：导出 / 导入（让版本更新、换浏览器都不丢调整） ===== */
+function renderDataState() {
+  var el = $("dataState");
+  if (!el) return;
+  var when = store._savedAt ? fmt(store._savedAt) : T("未知","unknown");
+  var src = FILE_DATA ? T("（已读取 site-data.js）","(loaded site-data.js)") : "";
+  el.textContent = T("当前数据最后保存时间：","Last saved: ") + when + " " + src;
+}
+function downloadText(name, text, mime) {
+  try {
+    var blob = new Blob([text], { type: mime || "text/javascript;charset=utf-8" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url; a.download = name; a.style.display = "none";
+    document.body.appendChild(a); a.click();
+    setTimeout(function () { URL.revokeObjectURL(url); if (a.parentNode) a.parentNode.removeChild(a); }, 1500);
+    return true;
+  } catch (e) { return false; }
+}
+function exportDataFile() {
+  saveStore();                                   // 先落盘，保证导出的是最新数据
+  var payload = JSON.parse(JSON.stringify(store));
+  var ok = downloadText("site-data.js", "window.__SITE_DATA__ = " + JSON.stringify(payload, null, 2) + ";\n", "text/javascript;charset=utf-8");
+  renderDataState();
+  toast(ok ? T("已导出 site-data.js，请放到 index.html 同目录","Exported site-data.js — put it next to index.html")
+           : T("导出失败，请换个浏览器试试","Export failed"));
+}
+function exportDataJson() {
+  saveStore();
+  var payload = JSON.parse(JSON.stringify(store));
+  var ok = downloadText("site-data-backup.json", JSON.stringify(payload, null, 2), "application/json;charset=utf-8");
+  toast(ok ? T("已导出 JSON 备份","JSON backup exported") : T("导出失败，请换个浏览器试试","Export failed"));
+}
+function importDataText(text) {
+  var d = null;
+  try { d = JSON.parse(text); } catch (e) {
+    var m = text.match(/\{[\s\S]*\}/);
+    if (m) { try { d = JSON.parse(m[0]); } catch (e2) { d = null; } }
+  }
+  if (!d || typeof d !== "object") { toast(T("文件格式不对，无法导入","Invalid file")); return; }
+  store = mergeStore(defaultStore(), d);
+  saveStore();
+  render(); renderProfileForm(); renderBadgeList(); renderQaList();
+  renderDataState();
+  if (window.fxdRender) { try { window.fxdRender(); } catch (e) {} }
+  toast(T("数据已恢复","Data restored"));
+}
+if ($("dataExportFile")) $("dataExportFile").addEventListener("click", exportDataFile);
+if ($("dataExportJson")) $("dataExportJson").addEventListener("click", exportDataJson);
+if ($("dataImportBtn")) $("dataImportBtn").addEventListener("click", function(){ $("dataImportFile").click(); });
+if ($("dataImportFile")) $("dataImportFile").addEventListener("change", function(){
+  var f = this.files && this.files[0];
+  if (!f) return;
+  var self = this;
+  var r = new FileReader();
+  r.onload = function(){ importDataText(String(r.result)); self.value = ""; };
+  r.readAsText(f, "utf-8");
 });
 
 $("fbSend").addEventListener("click", function(){
@@ -1982,10 +2149,16 @@ var STR = {
   adminBar: ["🛠️ <b>管理模式已开启</b> — 你现在可以回复聊天、匿名公开记录、上传文件、发布动态、编辑资料、更换档案照片、编辑页边格言、管理分身问答、增删档案徽章、调节粒子背景。", "🛠️ <b>Admin mode on</b> — you can reply to chats, publish anonymously, upload files, post moments, edit the profile, change the archive photo, edit the motto, manage avatar Q&A, manage profile badges, and tune background FX."],
   about: ["👤 关于我", "👤 About Me"],
   adminTag: ["管理员", "ADMIN"],
-  editProfile: ["编辑简介", "Edit Profile"],
+  editProfile: ["编辑简介 / 个人资料", "Edit Profile"],
   lblName: ["名字", "Name"],
   lblTag: ["一句话介绍", "One-line intro"],
-  saveProfile: ["保存简介", "Save"],
+  lblSince: ["建站日期（精确到天）", "Launch date (day level)"],
+  saveProfile: ["保存资料", "Save"],
+  adminData: ["管理员 · 数据备份（版本更新不丢）", "ADMIN · Data backup"],
+  dataHint: ["你在管理模式下的所有调整都保存在本机「浏览器存储」里，换新版本（替换 index.html）不会清空它们；但换浏览器、换设备或清理浏览器数据时可能会丢。点「导出数据文件」，把下载的 site-data.js 放到 index.html 同目录，数据就会随站点长期保留，以后每个新版本都会自动读取它。", "All your admin edits live in this browser's local storage. Replacing index.html with a newer version will NOT wipe them, but switching browser/device or clearing browser data might. Click \"Export data file\" and put the downloaded site-data.js next to index.html — the data then travels with the site, and every future version reads it automatically."],
+  dataExportFile: ["导出数据文件 site-data.js", "Export site-data.js"],
+  dataExportJson: ["导出 JSON 备份", "Export JSON backup"],
+  dataImportBtn: ["导入数据文件", "Import data file"],
   dvTitle: ["数字分身 · 问我", "Digital Avatar · Ask Me"],
   dvPh: ["随便问点什么…（回车发送）", "Ask me anything… (Enter to send)"],
   send: ["发送", "Send"],
@@ -2063,7 +2236,7 @@ var STR = {
   bgUrlPh: ["图片链接（可选）", "Image URL (optional)"],
   bgApply: ["添加背景图", "Add images"],
   bgClear: ["全部清除", "Clear all"],
-  bgHint: ["最多 16 张；每次打开网页随机选一张，之后每 2~3 分钟自动淡入淡出切换。上传本地图片会自动裁掉黑边并压缩优化（不限原始大小，仅保存在当前浏览器），也可直接粘贴图片链接。", "Up to 16 images; a random one shows on each visit, then crossfades every 2-3 minutes. Local uploads are auto cropped (black borders) and optimized (any original size, stored in this browser only); image URLs also work."],
+  bgHint: ["最多 25 张；每次打开网页随机选一张，之后每 2~3 分钟自动淡入淡出切换。上传本地图片会自动裁掉黑边并压缩优化（不限原始大小，仅保存在当前浏览器），也可直接粘贴图片链接。", "Up to 25 images; a random one shows on each visit, then crossfades every 2-3 minutes. Local uploads are auto cropped (black borders) and optimized (any original size, stored in this browser only); image URLs also work."],
   arcTop: ["🗂️ 个人档案 · PERSONAL ARCHIVE · LJX-2026", "🗂️ PERSONAL ARCHIVE · LJX-2026"],
   arcNo: ["🔖 档案编号 NO. LJX-2026-001", "🔖 ARCHIVE NO. LJX-2026-001"],
   arcOnline: ["在线 ONLINE", "ONLINE"],
@@ -2162,7 +2335,7 @@ $("themeBtn").addEventListener("click", function(){
 var LS_BGLIST = "lujiaxi_bg_list_v1";
 var LS_BGLAST = "lujiaxi_bg_last";
 var LS_BG_OLD = "lujiaxi_bg";
-var BG_MAX = 16;
+var BG_MAX = 25;
 var bgCur = -1;        /* 当前展示的图片下标 */
 var bgTimer = null;
 var bgActive = 0;      /* 0 => #bgA 可见，1 => #bgB 可见 */
@@ -2461,13 +2634,13 @@ function bgSeed(){
   bgListSave(list);
 }
 
-/* ---- 添加（多选文件 / 图片链接，上限 16 张） ---- */
+/* ---- 添加（多选文件 / 图片链接，上限 25 张） ---- */
 $("bgApply").addEventListener("click", function(){
   if (!am) { toast(T("请先进入管理模式", "Enter admin mode first")); return; }
   var url = $("bgUrl").value.trim();
   var files = Array.prototype.slice.call($("bgFile").files || []);
   var room = BG_MAX - bgListGet().length;
-  if (room <= 0) { toast(T("最多 16 张，先删除一些", "Max 16 images - remove some first")); return; }
+  if (room <= 0) { toast(T("最多 25 张，先删除一些", "Max 25 images - remove some first")); return; }
   if (files.length) {
     files = files.slice(0, room);
     var added = 0, done = 0;
@@ -3310,10 +3483,10 @@ $("fxSave").addEventListener("click", function () {
     if (!st || !window.FX) return;
     var s = window.FX.state(), it = null;
     FXLIST.forEach(function (o) { if (o.k === s.key) it = o; });
-    if (s.phase === "idle") { st.textContent = T("当前：自动待机", "Status: auto standby"); if (icon) icon.textContent = "✦"; }
+    if (s.phase === "idle") { st.textContent = T("当前：自动待机", "Status: auto standby"); if (icon && window.fxdMode === "fx") icon.textContent = "✦"; }
     else {
       st.textContent = T("当前：", "Now: ") + (it ? it.n : s.key) + " · " + T(FXPH[s.phase] || s.phase, s.phase);
-      if (icon && it) icon.textContent = it.i;
+      if (icon && it && window.fxdMode === "fx") icon.textContent = it.i;
     }
   }, 1000);
 })();
@@ -3330,8 +3503,13 @@ $("fxSave").addEventListener("click", function () {
     dock.classList.toggle("fxd-flip", flip);
     dock.classList.toggle("fxd-edge-l", !flip && x <= 4);
     dock.classList.toggle("fxd-edge-r", flip && x >= window.innerWidth - 60);
-    /* 翻转时球位于容器右端：容器左缘 = 球x - 面板宽 - 间隙 */
-    dock.style.left = (flip ? x - panel.offsetWidth - 10 : x) + "px";
+    /* 翻转时球位于容器右端：容器左缘 = 球x - 当前激活面板宽 - 间隙 */
+    var pw = 236, ap = $("fxdPanel");
+    if (window.fxdMode === "bg") ap = $("fxdPanelBg");
+    else if (window.fxdMode === "music") ap = $("fxdPanelMusic");
+    if (ap && !ap.hidden && ap.offsetWidth) pw = ap.offsetWidth;
+    else if (window.innerWidth <= 640) pw = 200;
+    dock.style.left = (flip ? x - pw - 10 : x) + "px";
     dock.style.top = y + "px";
     dock.style.transform = "none";
   }
@@ -3373,6 +3551,172 @@ $("fxSave").addEventListener("click", function () {
   });
 })();
 
+/* ===== 悬浮球分身与背景切换 ===== */
+(function () {
+  var FXD_MODES = {
+    fx: { icon: "✦", title: "粒子天气" },
+    bg: { icon: "🎨", title: "背景切换" },
+    music: { icon: "🎵", title: "音乐播放（下版本）" }
+  };
+  var fxdOrder = ["fx", "bg", "music"];
+  window.fxdMode = "fx";
+  var fxdSwapping = false;
+  var satA = $("fxdSatA"), satB = $("fxdSatB"), stack = $("fxdStack");
+  if (!satA || !satB || !stack) return;
+
+  window.fxdRender = function () {
+    var others = fxdOrder.filter(function (m) { return m !== window.fxdMode; });
+    satA.textContent = FXD_MODES[others[0]].icon;
+    satA.title = FXD_MODES[others[0]].title;
+    satA.setAttribute("data-mode", others[0]);
+    satB.textContent = FXD_MODES[others[1]].icon;
+    satB.title = FXD_MODES[others[1]].title;
+    satB.setAttribute("data-mode", others[1]);
+    $("fxdBall").title = FXD_MODES[window.fxdMode].title;
+    if (window.fxdMode !== "fx") $("fxdIcon").textContent = FXD_MODES[window.fxdMode].icon;
+    $("fxdPanel").hidden = window.fxdMode !== "fx";
+    $("fxdPanelBg").hidden = window.fxdMode !== "bg";
+    $("fxdPanelMusic").hidden = window.fxdMode !== "music";
+  };
+
+  function swapTo(m, sat, off) {
+    if (fxdSwapping || !m || m === window.fxdMode) return;
+    fxdSwapping = true;
+    stack.style.setProperty("--swapY", off);
+    sat.classList.add("swap-in");
+    stack.classList.add("swap-out");
+    setTimeout(function () {
+      window.fxdMode = m;
+      window.fxdRender();
+      sat.classList.remove("swap-in");
+      stack.classList.remove("swap-out");
+      fxdSwapping = false;
+    }, 310);
+  }
+  satA.addEventListener("click", function () { swapTo(satA.getAttribute("data-mode"), satA, "-64px"); });
+  satB.addEventListener("click", function () { swapTo(satB.getAttribute("data-mode"), satB, "64px"); });
+
+  /* ---- 背景模式（纯色 / 背景图），访客偏好存 coco_bgmode ---- */
+  var LS_BGMODE = "coco_bgmode";
+  /* 主题色板 10 列 x 6 行（取自主题色截图实测色值：主题色 + 2 浅 + 3 深） */
+  var BG_PAL = [
+    ["#FFFFFF", "#F2F2F2", "#D8D8D8", "#BFBFBF", "#A5A5A5", "#7F7F7F"],
+    ["#000000", "#7F7F7F", "#595959", "#3F3F3F", "#262626", "#0C0C0C"],
+    ["#E8E8E8", "#D0D0D0", "#AEAEAE", "#747474", "#3A3A3A", "#171717"],
+    ["#0E2841", "#DBE9F7", "#A6C9EB", "#4D94D8", "#215E99", "#153D64"],
+    ["#156082", "#C1E4F5", "#83CAEB", "#45B0E1", "#0F4861", "#0A3041"],
+    ["#E97132", "#FAE2D6", "#F6C6AC", "#F1A984", "#BF4F14", "#7F340D"],
+    ["#196B24", "#C1F0C8", "#84E291", "#47D45A", "#12501B", "#0C3512"],
+    ["#0F9ED5", "#CAEDFB", "#95DCF7", "#60CBF3", "#0B769F", "#074F6A"],
+    ["#A02B93", "#F1CEEE", "#E49EDD", "#D76DCC", "#78206E", "#501549"],
+    ["#4EA72E", "#D9F2D0", "#B3E5A1", "#8ED873", "#3A7D22", "#265316"]
+  ];
+  function bgModeGet() {
+    var s;
+    try { s = JSON.parse(localStorage.getItem(LS_BGMODE) || "null") || {}; } catch (e) { s = {}; }
+    /* 旧版存档（无版本号）迁移：“纯色+自选色”归入调色板；新存档带 v:2 不迁移 */
+    if (!s.v && s.mode === "solid" && s.color) s.mode = "palette";
+    return s;
+  }
+  function bgModeSave(o) { o.v = 2; try { localStorage.setItem(LS_BGMODE, JSON.stringify(o)); } catch (e) {} }
+  /* 颜色按比例压暗（t=0.55 适当调暗，保持色相） */
+  function shadeHex(hex, t) {
+    var r = parseInt(hex.substr(1, 2), 16), g = parseInt(hex.substr(3, 2), 16), b = parseInt(hex.substr(5, 2), 16);
+    r = Math.round(r * (1 - t)); g = Math.round(g * (1 - t)); b = Math.round(b * (1 - t));
+    function h(v) { var s = v.toString(16).toUpperCase(); return s.length < 2 ? "0" + s : s; }
+    return "#" + h(r) + h(g) + h(b);
+  }
+
+  var pal = $("bgPal");
+  BG_PAL.forEach(function (col) {
+    col.forEach(function (hex) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "fxd-sw";
+      b.style.background = hex;
+      b.title = hex;
+      b.setAttribute("data-c", hex);
+      b.addEventListener("click", function () {
+        var s = bgModeGet(); s.mode = "palette"; s.color = hex;
+        bgModeSave(s);
+        $("bgmPal").checked = true;
+        pal.style.display = "";
+        $("bgImgBox").style.display = "none";
+        window.bgSolidApply();
+      });
+      pal.appendChild(b);
+    });
+  });
+
+  window.bgSolidApply = function () {
+    var s = bgModeGet();
+    var light = document.body.classList.contains("light");
+    if (s.mode !== "palette" && s.mode !== "solid") {
+      document.body.classList.remove("bg-solid");
+      document.body.style.backgroundColor = "";
+    } else {
+      var base;
+      if (s.mode === "palette" && s.color) base = s.color;
+      else base = light ? "#FFFFFF" : "#000000"; /* 纯色模式：白天白 / 黑夜黑 */
+      /* 黑夜下调色板自选色适当调暗（保持背景底板淡化），白天用原色 */
+      var disp = (!light && s.mode === "palette" && s.color) ? shadeHex(base, 0.55) : base;
+      document.body.style.backgroundColor = disp;
+      document.body.classList.add("bg-solid");
+    }
+    var sws = pal.querySelectorAll(".fxd-sw");
+    for (var i = 0; i < sws.length; i++) sws[i].classList.toggle("sel", s.mode === "palette" && !!s.color && sws[i].getAttribute("data-c") === s.color);
+  };
+
+  /* 面板状态恢复 */
+  var sv = bgModeGet();
+  if (sv.mode === "palette") {
+    $("bgmPal").checked = true;
+    pal.style.display = "";
+    $("bgImgBox").style.display = "none";
+  } else if (sv.mode === "solid") {
+    $("bgmSolid").checked = true;
+    $("bgImgBox").style.display = "none";
+  }
+
+  $("bgmPal").addEventListener("change", function () {
+    if (!this.checked) return;
+    pal.style.display = "";
+    $("bgImgBox").style.display = "none";
+    var s = bgModeGet(); s.mode = "palette"; bgModeSave(s); window.bgSolidApply();
+  });
+  $("bgmSolid").addEventListener("change", function () {
+    if (!this.checked) return;
+    pal.style.display = "none";
+    $("bgImgBox").style.display = "none";
+    var s = bgModeGet(); s.mode = "solid"; bgModeSave(s); window.bgSolidApply();
+  });
+  $("bgmImg").addEventListener("change", function () {
+    if (!this.checked) return;
+    pal.style.display = "none";
+    $("bgImgBox").style.display = "";
+    var s = bgModeGet(); s.mode = "img"; bgModeSave(s); window.bgSolidApply();
+  });
+  $("bgRefresh").addEventListener("click", function () {
+    if (typeof bgNext === "function" && bgListGet().length > 1) { bgNext(); toast(T("已换一张背景", "Background changed")); }
+    else toast(T("暂无更多背景图", "No more backgrounds yet"));
+  });
+  $("bgRecommend").addEventListener("click", function () {
+    if (typeof navTo === "function") navTo("home");
+    setTimeout(function () {
+      var el = $("secFeedback");
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      var inp = $("fbInp");
+      if (inp) setTimeout(function () { inp.focus(); }, 650);
+    }, 90);
+  });
+
+  /* 主题切换后：纯色默认色（未自选时）按新昼夜重算 */
+  var tb = $("themeBtn");
+  if (tb) tb.addEventListener("click", function () { setTimeout(function () { window.bgSolidApply(); }, 20); });
+
+  window.fxdRender();
+})();
+
 loadFxPanel();
 applyFxSettings();
 
@@ -3382,6 +3726,7 @@ bgMigrate();
 bgSeed();
 renderBgThumbs();
 applyBg();
+if (window.bgSolidApply) window.bgSolidApply();
 route();
 </script>
 </body>
