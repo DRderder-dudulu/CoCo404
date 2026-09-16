@@ -484,11 +484,11 @@
    仅细指针(鼠标)设备由 JS 启用；输入框内保留系统光标便于编辑。 */
   * { cursor: none; }
   input, textarea, select { cursor: auto; }
-  #neonCursor { position: fixed; left: -100px; top: -100px; width: 22px; height: 22px; border-radius: 50%;
+  #neonCursor { position: fixed; left: 0; top: 0; width: 22px; height: 22px; border-radius: 50%;
     border: 2px solid rgba(255,255,255,.92); background: transparent;
     box-shadow: 0 0 3px var(--accent), 0 0 12px var(--accent), inset 0 0 6px var(--accent);
-    transform: translate(-50%, -50%);
-    transition: left .16s cubic-bezier(.22,1,.36,1), top .16s cubic-bezier(.22,1,.36,1),
+    transform: translate3d(-100px, -100px, 0) translate(-50%, -50%);
+    transition: transform .16s cubic-bezier(.22,1,.36,1),
                 width .18s ease, height .18s ease, opacity .25s ease;
     pointer-events: none; z-index: 10001; opacity: 0;
     animation: curGlow 2.6s ease-in-out infinite alternate; }
@@ -2524,6 +2524,25 @@ function applyBg(){
   bgSchedule();
 }
 
+/* ---- 预加载下一张：利用轮播间隙提前下载+解码，切图时零等待 ---- */
+var bgPre = { idx: -1, src: null, ready: false, img: null };
+function bgPreloadNext(){
+  var list = bgListGet();
+  bgPre.idx = -1; bgPre.src = null; bgPre.ready = false; bgPre.img = null;
+  if (list.length < 2) return;
+  var r = Math.floor(Math.random() * list.length);
+  if (r === bgCur) r = (r + 1) % list.length;
+  bgSrcOf(list[r], function(src){
+    if (!src) return;
+    var im = new Image();
+    bgPre.idx = r; bgPre.src = src; bgPre.img = im;
+    var done = function(){ if (bgPre.img === im) bgPre.ready = true; };
+    if (im.decode) { im.decode().then(done, done); }
+    else { im.onload = done; }
+    im.src = src;
+  });
+}
+
 /* 展示第 idx 张：instant=true 直接显示（每次打开随机一张）；否则预加载后淡入淡出 */
 function bgShow(idx, instant){
   var list = bgListGet();
@@ -2538,17 +2557,25 @@ function bgShow(idx, instant){
       showEl.style.backgroundImage = 'url("' + src + '")';
       showEl.classList.add("on");
       bgPan();
+      bgPreloadNext();
       return;
     }
-    var im = new Image();
-    im.onload = function(){
+    function swap(){
       showEl.style.backgroundImage = 'url("' + src + '")';
-      bgPan();
+      bgPanLast = -2; bgPan();
       void showEl.offsetWidth; /* 强制 reflow，确保 transition 生效 */
       showEl.classList.add("on");
       if (hideEl) hideEl.classList.remove("on");
       bgActive = 1 - bgActive;
-    };
+      bgPreloadNext();
+    }
+    /* 命中预加载：图已下载+解码完毕，立即切换 */
+    if (bgPre.ready && bgPre.idx === idx && bgPre.src === src) { swap(); return; }
+    var im = new Image();
+    var done = false;
+    /* 慢网兜底：4s 未加载完也先切换，浏览器会继续加载显示，避免"点了没反应" */
+    var fb = setTimeout(function(){ if (!done) { done = true; swap(); } }, 4000);
+    im.onload = function(){ if (done) return; done = true; clearTimeout(fb); swap(); };
     im.src = src;
   });
 }
@@ -2557,8 +2584,13 @@ function bgShow(idx, instant){
 function bgNext(){
   var list = bgListGet();
   if (list.length < 2) return;
-  var next = bgCur;
-  while (next === bgCur) next = Math.floor(Math.random() * list.length);
+  var next;
+  if (bgPre.ready && bgPre.idx >= 0 && bgPre.idx < list.length && bgPre.idx !== bgCur) {
+    next = bgPre.idx; /* 直接用已预加载+解码的那张，零等待 */
+  } else {
+    next = bgCur;
+    while (next === bgCur) next = Math.floor(Math.random() * list.length);
+  }
   bgCur = next;
   try { localStorage.setItem(LS_BGLAST, String(next)); } catch(e){}
   bgShow(next, false);
@@ -2578,19 +2610,27 @@ function bgSchedule(){
 }
 
 /* 背景图视差：两层同步按页面滚动进度平移（不会露出边缘） */
+var bgPanRaf = 0, bgPanLast = -2;
 function bgPan(){
-  var els = bgEls();
-  var pos = "center center";
-  if (document.body.classList.contains("has-bg")) {
-    var doc = document.documentElement;
-    var max = Math.max(1, (doc.scrollHeight || 0) - (window.innerHeight || 0));
-    var y = window.scrollY || window.pageYOffset || 0;
-    var p = y / max;
-    if (p < 0) p = 0; if (p > 1) p = 1;
-    pos = "center " + (p * 100).toFixed(2) + "%";
-  }
-  els[0].style.backgroundPosition = pos;
-  els[1].style.backgroundPosition = pos;
+  if (bgPanRaf) return; /* 每帧最多执行一次 */
+  bgPanRaf = requestAnimationFrame(function(){
+    bgPanRaf = 0;
+    var pos = "center center", key = -1;
+    if (document.body.classList.contains("has-bg")) {
+      var doc = document.documentElement;
+      var max = Math.max(1, (doc.scrollHeight || 0) - (window.innerHeight || 0));
+      var y = window.scrollY || window.pageYOffset || 0;
+      var p = y / max;
+      if (p < 0) p = 0; if (p > 1) p = 1;
+      key = Math.round(p * 200); /* 0.5% 步进：微小滚动不触发全屏重绘 */
+      pos = "center " + (key / 2).toFixed(1) + "%";
+    }
+    if (key === bgPanLast) return;
+    bgPanLast = key;
+    var els = bgEls();
+    els[0].style.backgroundPosition = pos;
+    els[1].style.backgroundPosition = pos;
+  });
 }
 window.addEventListener("scroll", bgPan, { passive: true });
 
@@ -2942,21 +2982,27 @@ sideTick();
   try { fine = window.matchMedia("(pointer: fine)").matches; } catch(e) { fine = false; }
   var ncur = $("neonCursor");
   if (!fine || !ncur) return;
-  document.addEventListener("pointermove", function(e){
-    ncur.style.left = e.clientX + "px";
-    ncur.style.top = e.clientY + "px";
+  var curX = -100, curY = -100, curTarget = null, curRaf = 0;
+  function curApply(){
+    curRaf = 0;
+    /* transform 走合成器，不触发 layout；配合 CSS transition 保留拖尾跟手感 */
+    ncur.style.transform = "translate3d(" + curX + "px," + curY + "px,0) translate(-50%,-50%)";
     document.body.classList.add("cur-on");
-    var t = e.target;
+    var t = curTarget;
     var hot = (t && t.closest) ? t.closest("a,button,input,textarea,select,label,[data-nav],.toc-item,.pub") : null;
     ncur.classList.toggle("big", !!hot);
     /* 介绍板块卡片：高光跟随指针，并隐藏光环本体 */
     var card = (t && t.closest) ? t.closest(".record-bar,.info-card,.intro-card") : null;
     if (card) {
       var cr = card.getBoundingClientRect();
-      card.style.setProperty("--mx", (e.clientX - cr.left).toFixed(1) + "px");
-      card.style.setProperty("--my", (e.clientY - cr.top).toFixed(1) + "px");
+      card.style.setProperty("--mx", (curX - cr.left).toFixed(1) + "px");
+      card.style.setProperty("--my", (curY - cr.top).toFixed(1) + "px");
     }
     ncur.classList.toggle("gone", !!card);
+  }
+  document.addEventListener("pointermove", function(e){
+    curX = e.clientX; curY = e.clientY; curTarget = e.target;
+    if (!curRaf) curRaf = requestAnimationFrame(curApply); /* 每帧最多处理一次 */
   }, { passive: true });
   document.addEventListener("pointerout", function(e){
     if (!e.relatedTarget) document.body.classList.remove("cur-on");
