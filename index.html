@@ -773,6 +773,11 @@
   .music-row { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px dashed var(--line); font-size: 13px; }
   .music-row-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .music-row-size { font-size: 12px; flex-shrink: 0; }
+  .music-off .music-row-name { opacity: .45; text-decoration: line-through; }
+  .priv-tag { display: inline-block; margin-left: 6px; padding: 1px 7px; border: 1px solid var(--accent); border-radius: 999px; color: var(--accent); font-size: 11px; vertical-align: 1px; }
+  .moment.is-priv, .repo-item.is-priv { opacity: .72; }
+  .pubrow { display: flex; gap: 16px; flex-wrap: wrap; }
+  .site-settings { padding: 14px; border: 1px dashed var(--line); border-radius: 14px; background: var(--card); margin: 16px 0; }
   @media (max-width: 640px) { .fxd-panel { width: 200px; } }
 /* ===== 悬浮球分身（背景切换 / 音乐占位） ===== */
   .fxd-stack { position: relative; width: 56px; height: 56px; flex: 0 0 56px; transition: transform .28s ease; }
@@ -925,7 +930,15 @@
           <p class="tagline arc-slogan" id="heroTag"></p>
         </div>
       </div>
-      <div class="spec">
+      <div class="admin-panel" id="badgePanel">
+        <div class="admin-tag" data-i18n="adminBadges">管理员 · 档案徽章</div>
+        <div class="formgrid" style="margin-top:12px">
+          <input type="text" id="badgeInp" data-i18n-ph="badgePh" placeholder="徽章文字，如：夜猫子">
+          <div><button class="btn sm" id="badgeAdd" data-i18n="badgeAdd">添加徽章</button></div>
+          <div id="badgeList"></div>
+          <p class="note" data-i18n="badgeHint">显示在主页大名下方的徽章条，带流星划过效果，蓝紫交替配色；文字里可以直接放 Emoji。</p>
+        </div>
+      </div>      <div class="spec">
         <div class="spec-title"><span data-i18n="specTitle">SPEC / 档案摘要</span><span class="spec-domain">LUJIAXI · HOME</span></div>
         <div class="spec-body">
           <div class="spec-photo">
@@ -949,7 +962,80 @@
           </div>
         </div>
       </div>
-    </header>
+      <div class="admin-panel" id="specPhotoPanel">
+        <div class="admin-tag" data-i18n="adminPhoto">管理员 · 档案照片</div>
+        <div class="formgrid" style="margin-top:12px">
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <input type="text" id="spUrl" data-i18n-ph="photoUrlPh" placeholder="图片链接（可选）" style="flex:2;min-width:200px">
+            <input type="file" id="spFile" accept="image/*" style="flex:1;min-width:160px">
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+            <button class="btn sm" id="spApply" data-i18n="photoApply">更换照片</button>
+            <button class="btn sm ghost" id="spReset" data-i18n="photoReset">恢复默认</button>
+            <span class="muted" id="spState" style="font-size:12px"></span>
+          </div>
+          <p class="note" data-i18n="photoHint">显示在主页「档案摘要」面板的照片位。本地图片会自动压缩到 240px 并只保存在当前浏览器；也可以直接粘贴图片链接。</p>
+        </div>
+      </div>    </header>
+
+    <div class="admin-panel site-settings" id="siteSettingsPanel">
+      <div class="admin-tag" data-i18n="adminSite">管理员 · 站点设置</div>
+      <div class="admin-panel" id="bgPanel">
+        <div class="admin-tag" data-i18n="adminBg">管理员 · 网页背景</div>
+        <div class="formgrid" style="margin-top:12px">
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <input type="text" id="bgUrl" data-i18n-ph="bgUrlPh" placeholder="图片链接（可选）" style="flex:2;min-width:200px">
+            <input type="file" id="bgFile" accept="image/*" multiple style="flex:1;min-width:160px">
+          </div>
+          <div style="display:flex;gap:10px">
+            <button class="btn sm" id="bgApply" data-i18n="bgApply">添加背景图</button>
+            <button class="btn sm ghost" id="bgClear" data-i18n="bgClear">全部清除</button>
+          </div>
+          <div id="bgThumbs" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+          <p class="note" data-i18n="bgHint">最多 25 张；每次打开网页随机选一张，之后每 2~3 分钟自动淡入淡出切换。上传本地图片会自动裁掉黑边并压缩优化（不限原始大小，仅保存在当前浏览器），也可直接粘贴图片链接。</p>
+        </div>
+      </div>      <div class="admin-panel" id="musicAdminPanel">
+        <div class="admin-tag" data-i18n="adminMusic">管理员 · 音乐管理</div>
+        <div class="formgrid" style="margin-top:12px">
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <input type="file" id="musicFile" accept="audio/*" multiple style="flex:1;min-width:200px">
+          </div>
+          <div style="display:flex;gap:10px">
+            <button class="btn sm" id="musicAdd" data-i18n="musicAddBtn">上传歌曲</button>
+          </div>
+          <div id="musicList"></div>
+          <div class="admin-tag" style="margin-top:14px" data-i18n="musicBuiltinTag">内置曲目（可禁用/恢复）</div>
+          <div id="musicBuiltinList"></div>
+          <p class="note" data-i18n="musicHint">支持 mp3 / m4a / ogg 等常见音频格式，可多选；歌曲仅保存在当前浏览器（不随数据备份导出），播放时与内置 6 首一起进入随机池。</p>
+        </div>
+      </div>      <div class="admin-panel" id="fxPanel">
+        <div class="admin-tag" data-i18n="adminFx">管理员 · 粒子背景</div>
+        <div class="formgrid" style="margin-top:12px">
+          <label>出现概率 <span class="muted" id="fxProbV">35%</span></label>
+          <input type="range" id="fxProb" min="5" max="90" step="5">
+          <label>数量倍率 <span class="muted" id="fxDenV">1.0×</span></label>
+          <input type="range" id="fxDen" min="0.5" max="2" step="0.1">
+          <label>光效强度 <span class="muted" id="fxGlowV">1.0×</span></label>
+          <input type="range" id="fxGlow" min="0" max="2" step="0.1">
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+            <label style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="fxEnabled"> <span data-i18n="fxAutoL">启用自动粒子</span></label>
+            <button class="btn sm" id="fxSave" data-i18n="fxSave">保存粒子设置</button>
+          </div>
+          <p class="note" data-i18n="fxHint">控制全站粒子背景：刷新时按概率触发，最长 7 分钟后淡出并重新判定。访客可用左侧页边小球自行开关或点播效果。</p>
+        </div>
+      </div>      <div class="admin-panel" id="dataPanel">
+        <div class="admin-tag" data-i18n="adminData">管理员 · 数据备份（版本更新不丢）</div>
+        <div class="formgrid" style="margin-top:12px">
+          <p class="note" data-i18n="dataHint">你在管理模式下的所有调整都保存在本机「浏览器存储」里，换新版本（替换 index.html）不会清空它们；但换浏览器、换设备或清理浏览器数据时可能会丢。点「导出数据文件」，把下载的 site-data.js 放到 index.html 同目录，数据就会随站点长期保留，以后每个新版本都会自动读取它。</p>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn sm" id="dataExportFile" data-i18n="dataExportFile">导出数据文件 site-data.js</button>
+            <button class="btn sm ghost" id="dataExportJson" data-i18n="dataExportJson">导出 JSON 备份</button>
+            <button class="btn sm ghost" id="dataImportBtn" data-i18n="dataImportBtn">导入数据文件</button>
+            <input type="file" id="dataImportFile" accept=".json,.js,application/json,text/javascript" style="display:none">
+          </div>
+          <p class="note" id="dataState" style="margin-top:4px"></p>
+        </div>
+      </div>    </div>
 
     <div class="home-grid">
       <div class="home-main">
@@ -1006,105 +1092,12 @@
         </div>
       </div>
 
-      <div class="admin-panel" id="dataPanel">
-        <div class="admin-tag" data-i18n="adminData">管理员 · 数据备份（版本更新不丢）</div>
-        <div class="formgrid" style="margin-top:12px">
-          <p class="note" data-i18n="dataHint">你在管理模式下的所有调整都保存在本机「浏览器存储」里，换新版本（替换 index.html）不会清空它们；但换浏览器、换设备或清理浏览器数据时可能会丢。点「导出数据文件」，把下载的 site-data.js 放到 index.html 同目录，数据就会随站点长期保留，以后每个新版本都会自动读取它。</p>
-          <div style="display:flex;gap:10px;flex-wrap:wrap">
-            <button class="btn sm" id="dataExportFile" data-i18n="dataExportFile">导出数据文件 site-data.js</button>
-            <button class="btn sm ghost" id="dataExportJson" data-i18n="dataExportJson">导出 JSON 备份</button>
-            <button class="btn sm ghost" id="dataImportBtn" data-i18n="dataImportBtn">导入数据文件</button>
-            <input type="file" id="dataImportFile" accept=".json,.js,application/json,text/javascript" style="display:none">
-          </div>
-          <p class="note" id="dataState" style="margin-top:4px"></p>
-        </div>
-      </div>
 
-      <div class="admin-panel" id="bgPanel">
-        <div class="admin-tag" data-i18n="adminBg">管理员 · 网页背景</div>
-        <div class="formgrid" style="margin-top:12px">
-          <div style="display:flex;gap:10px;flex-wrap:wrap">
-            <input type="text" id="bgUrl" data-i18n-ph="bgUrlPh" placeholder="图片链接（可选）" style="flex:2;min-width:200px">
-            <input type="file" id="bgFile" accept="image/*" multiple style="flex:1;min-width:160px">
-          </div>
-          <div style="display:flex;gap:10px">
-            <button class="btn sm" id="bgApply" data-i18n="bgApply">添加背景图</button>
-            <button class="btn sm ghost" id="bgClear" data-i18n="bgClear">全部清除</button>
-          </div>
-          <div id="bgThumbs" style="display:flex;gap:8px;flex-wrap:wrap"></div>
-          <p class="note" data-i18n="bgHint">最多 25 张；每次打开网页随机选一张，之后每 2~3 分钟自动淡入淡出切换。上传本地图片会自动裁掉黑边并压缩优化（不限原始大小，仅保存在当前浏览器），也可直接粘贴图片链接。</p>
-        </div>
-      </div>
 
-      <div class="admin-panel" id="musicAdminPanel">
-        <div class="admin-tag" data-i18n="adminMusic">管理员 · 音乐管理</div>
-        <div class="formgrid" style="margin-top:12px">
-          <div style="display:flex;gap:10px;flex-wrap:wrap">
-            <input type="file" id="musicFile" accept="audio/*" multiple style="flex:1;min-width:200px">
-          </div>
-          <div style="display:flex;gap:10px">
-            <button class="btn sm" id="musicAdd" data-i18n="musicAddBtn">上传歌曲</button>
-          </div>
-          <div id="musicList"></div>
-          <p class="note" data-i18n="musicHint">支持 mp3 / m4a / ogg 等常见音频格式，可多选；歌曲仅保存在当前浏览器（不随数据备份导出），播放时与内置 6 首一起进入随机池。</p>
-        </div>
-      </div>
 
-      <div class="admin-panel" id="specPhotoPanel">
-        <div class="admin-tag" data-i18n="adminPhoto">管理员 · 档案照片</div>
-        <div class="formgrid" style="margin-top:12px">
-          <div style="display:flex;gap:10px;flex-wrap:wrap">
-            <input type="text" id="spUrl" data-i18n-ph="photoUrlPh" placeholder="图片链接（可选）" style="flex:2;min-width:200px">
-            <input type="file" id="spFile" accept="image/*" style="flex:1;min-width:160px">
-          </div>
-          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-            <button class="btn sm" id="spApply" data-i18n="photoApply">更换照片</button>
-            <button class="btn sm ghost" id="spReset" data-i18n="photoReset">恢复默认</button>
-            <span class="muted" id="spState" style="font-size:12px"></span>
-          </div>
-          <p class="note" data-i18n="photoHint">显示在主页「档案摘要」面板的照片位。本地图片会自动压缩到 240px 并只保存在当前浏览器；也可以直接粘贴图片链接。</p>
-        </div>
-      </div>
 
-      <div class="admin-panel" id="mottoPanel">
-        <div class="admin-tag" data-i18n="adminMotto">管理员 · 页边格言</div>
-        <div class="formgrid" style="margin-top:12px">
-          <input type="text" id="mtMain" data-i18n-ph="mottoMainPh" placeholder="格言主句，如：Hello World!">
-          <input type="text" id="mtSub" data-i18n-ph="mottoSubPh" placeholder="格言副句，如：一个记录生活与热爱的小站">
-          <div style="display:flex;gap:10px">
-            <button class="btn sm" id="mtSave" data-i18n="mottoSave">保存格言</button>
-            <button class="btn sm ghost" id="mtReset" data-i18n="mottoReset">恢复默认</button>
-          </div>
-          <p class="note" data-i18n="mottoHint">显示在主页右侧边栏的格言卡。留空即恢复默认文案。</p>
-        </div>
-      </div>
 
-      <div class="admin-panel" id="badgePanel">
-        <div class="admin-tag" data-i18n="adminBadges">管理员 · 档案徽章</div>
-        <div class="formgrid" style="margin-top:12px">
-          <input type="text" id="badgeInp" data-i18n-ph="badgePh" placeholder="徽章文字，如：夜猫子">
-          <div><button class="btn sm" id="badgeAdd" data-i18n="badgeAdd">添加徽章</button></div>
-          <div id="badgeList"></div>
-          <p class="note" data-i18n="badgeHint">显示在主页大名下方的徽章条，带流星划过效果，蓝紫交替配色；文字里可以直接放 Emoji。</p>
-        </div>
-      </div>
 
-      <div class="admin-panel" id="fxPanel">
-        <div class="admin-tag" data-i18n="adminFx">管理员 · 粒子背景</div>
-        <div class="formgrid" style="margin-top:12px">
-          <label>出现概率 <span class="muted" id="fxProbV">35%</span></label>
-          <input type="range" id="fxProb" min="5" max="90" step="5">
-          <label>数量倍率 <span class="muted" id="fxDenV">1.0×</span></label>
-          <input type="range" id="fxDen" min="0.5" max="2" step="0.1">
-          <label>光效强度 <span class="muted" id="fxGlowV">1.0×</span></label>
-          <input type="range" id="fxGlow" min="0" max="2" step="0.1">
-          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-            <label style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="fxEnabled"> <span data-i18n="fxAutoL">启用自动粒子</span></label>
-            <button class="btn sm" id="fxSave" data-i18n="fxSave">保存粒子设置</button>
-          </div>
-          <p class="note" data-i18n="fxHint">控制全站粒子背景：刷新时按概率触发，最长 7 分钟后淡出并重新判定。访客可用左侧页边小球自行开关或点播效果。</p>
-        </div>
-      </div>
     </section>
 
     <!-- SEC.02 数字分身（第一版布局 · 主页） -->
@@ -1198,7 +1191,18 @@
           <div class="motto-sub" data-i18n="mottoSub">一个记录生活与热爱的小站</div>
           <span class="mq mq-r">❞</span>
         </div>
-        <!-- 时钟天气卡（样式借鉴 imsyy/home · MIT） -->
+        <div class="admin-panel" id="mottoPanel">
+          <div class="admin-tag" data-i18n="adminMotto">管理员 · 页边格言</div>
+          <div class="formgrid" style="margin-top:12px">
+            <input type="text" id="mtMain" data-i18n-ph="mottoMainPh" placeholder="格言主句，如：Hello World!">
+            <input type="text" id="mtSub" data-i18n-ph="mottoSubPh" placeholder="格言副句，如：一个记录生活与热爱的小站">
+            <div style="display:flex;gap:10px">
+              <button class="btn sm" id="mtSave" data-i18n="mottoSave">保存格言</button>
+              <button class="btn sm ghost" id="mtReset" data-i18n="mottoReset">恢复默认</button>
+            </div>
+            <p class="note" data-i18n="mottoHint">显示在主页右侧边栏的格言卡。留空即恢复默认文案。</p>
+          </div>
+        </div>        <!-- 时钟天气卡（样式借鉴 imsyy/home · MIT） -->
         <div class="side-card clock-card">
           <div class="clk-date" id="clkDate"></div>
           <div class="clk-time" id="clkTime"></div>
@@ -1301,6 +1305,10 @@
             <input type="file" id="moFile" accept="image/*">
             <button class="btn sm" id="moBtn" data-i18n="postBtn">发布</button>
           </div>
+          <div class="pubrow">
+            <label class="fxd-auto"><input type="radio" name="moPub" id="moPubY" checked> <span data-i18n="pubYes">公开（所有人可见）</span></label>
+            <label class="fxd-auto"><input type="radio" name="moPub" id="moPubN"> <span data-i18n="pubNo">私密（仅管理模式可见）</span></label>
+          </div>
         </div>
       </div>
 
@@ -1319,6 +1327,10 @@
         <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px">
           <input type="text" id="rpUrl" data-i18n-ph="repoUrlPh" placeholder="网址，如：https://example.com/file.zip">
           <input type="text" id="rpNote" data-i18n-ph="repoNotePh" placeholder="备注（可选），如：专业课课件下载">
+          <div class="pubrow">
+            <label class="fxd-auto"><input type="radio" name="rpPub" id="rpPubY" checked> <span data-i18n="pubYes">公开（所有人可见）</span></label>
+            <label class="fxd-auto"><input type="radio" name="rpPub" id="rpPubN"> <span data-i18n="pubNo">私密（仅管理模式可见）</span></label>
+          </div>
           <div><button class="btn sm" id="rpAdd" data-i18n="repoAdd">添加网址</button></div>
         </div>
       </div>
@@ -1561,16 +1573,19 @@ function renderFb() {
 /* ---- 我的仓库 ---- */
 function renderLinks() {
   var box = $("repoList");
-  if (!store.links.length) {
+  var arr = store.links.map(function(x,i){ return { x:x, i:i }; }).filter(function(o){ return am || o.x.pub !== false; });
+  if (!arr.length) {
     box.innerHTML = '<p class="muted">'+T("仓库还空着。","Nothing stored yet.")+'</p>';
     return;
   }
-  box.innerHTML = store.links.map(function(x,i){ return { x:x, i:i }; }).reverse().map(function(o){
+  box.innerHTML = arr.reverse().map(function(o){
     var x = o.x;
-    return '<div class="repo-item"><div class="r-main">'+
-      '<div class="r-url">🔗 <a href="'+esc(x.url)+'" target="_blank" rel="noopener">'+esc(x.url)+'</a></div>'+
+    var tag = (x.pub === false) ? '<span class="priv-tag">'+T("私密","Private")+'</span>' : "";
+    var tog = am ? '<button class="btn sm ghost" data-toglink="'+o.i+'">'+(x.pub===false?T("转为公开","Make public"):T("转为私密","Make private"))+'</button>' : "";
+    return '<div class="repo-item'+(x.pub===false?" is-priv":"")+'"><div class="r-main">'+
+      '<div class="r-url">🔗 <a href="'+esc(x.url)+'" target="_blank" rel="noopener">'+esc(x.url)+'</a>'+tag+'</div>'+
       (x.note ? '<div class="r-note">'+esc(x.note).replace(/\n/g,"<br>")+'</div>' : '')+
-      '<div class="r-ts">'+fmt(x.time)+'</div></div>'+
+      '<div class="r-ts">'+fmt(x.time)+'</div></div>'+tog+
       (am ? '<button class="btn sm ghost" data-dellink="'+o.i+'" style="color:var(--danger)">'+T("删除","Delete")+'</button>' : '')+
       '</div>';
   }).join("");
@@ -1747,16 +1762,19 @@ function fileKind(mime){
 
 /* ---- 动态 ---- */
 function renderMoments() {
-  if (!store.moments.length) {
+  var list = store.moments.filter(function (m) { return am || m.pub !== false; });
+  if (!list.length) {
     $("timeline").innerHTML = '<p class="muted">'+T("还没有动态。","No moments yet.")+'</p>';
     return;
   }
-  $("timeline").innerHTML = store.moments.slice().reverse().map(function(m){
+  $("timeline").innerHTML = list.slice().reverse().map(function(m){
     var img = m.media ? '<img src="'+m.media+'" alt="">' : "";
     var del = am ? '<button class="del" data-delmo="'+esc(m.id)+'">'+T("删除","Delete")+'</button>' : "";
-    return '<div class="moment">'+del+
+    var tog = am ? '<button class="del" data-togmo="'+esc(m.id)+'">'+(m.pub===false?T("转为公开","Make public"):T("转为私密","Make private"))+'</button>' : "";
+    var tag = (m.pub === false) ? '<span class="priv-tag">'+T("私密","Private")+'</span>' : "";
+    return '<div class="moment'+(m.pub===false?" is-priv":"")+'">'+del+tog+
       '<div class="mhead"><div class="av">'+esc((trData(store.profile.name)||"吕").charAt(0))+'</div>'+
-      '<div class="nm">'+esc(trData(store.profile.name))+'</div><time>'+fmt(m.time)+"</time></div>"+
+      '<div class="nm">'+esc(trData(store.profile.name))+'</div><time>'+fmt(m.time)+"</time>"+tag+"</div>"+
       '<p>'+esc(m.text)+"</p>"+img+"</div>";
   }).join("");
 }
@@ -1838,10 +1856,11 @@ function publishMoment(){
   var text = $("moText").value.trim();
   var file = $("moFile").files[0];
   if (!text && !file) { toast(T("写点什么再发布","Write something first")); return; }
+  var pub = !$("moPubN") || !$("moPubN").checked;
   var finish = function(media){
-    store.moments.push({ id: uid(), text: text||T("(图片动态)","(Image post)"), media: media||null, time: Date.now() });
-    saveStore(); $("moText").value=""; $("moFile").value=""; renderMoments();
-    toast(T("动态已发布","Moment posted"));
+    store.moments.push({ id: uid(), text: text||T("(图片动态)","(Image post)"), media: media||null, time: Date.now(), pub: pub });
+    saveStore(); $("moText").value=""; $("moFile").value=""; if ($("moPubY")) $("moPubY").checked = true; renderMoments();
+    toast(pub ? T("动态已发布","Moment posted") : T("已发布为私密动态（仅管理模式可见）","Posted as private (admin only)"));
   };
   if (file) { readFile(file, finish, false); }
   else { finish(null); }
@@ -1962,9 +1981,10 @@ $("rpAdd").addEventListener("click", function(){
   var n = $("rpNote").value.trim();
   if (!u) { toast(T("先填网址","Enter a URL first")); return; }
   if (!/^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(u)) u = "https://" + u;
-  store.links.push({ id: uid(), url: u, note: n, time: Date.now() });
-  saveStore(); $("rpUrl").value = ""; $("rpNote").value = ""; renderLinks();
-  toast(T("已添加网址","Link added"));
+  var pub = !$("rpPubN") || !$("rpPubN").checked;
+  store.links.push({ id: uid(), url: u, note: n, time: Date.now(), pub: pub });
+  saveStore(); $("rpUrl").value = ""; $("rpNote").value = ""; if ($("rpPubY")) $("rpPubY").checked = true; renderLinks();
+  toast(pub ? T("已添加网址","Link added") : T("已添加私密网址（仅管理模式可见）","Added as private link (admin only)"));
 });
 
 document.addEventListener("click", function(e){
@@ -2013,6 +2033,18 @@ document.addEventListener("click", function(e){
     return;
   }
 
+  var tm = t.closest("[data-togmo]");
+  if (tm) {
+    var tmid = tm.getAttribute("data-togmo");
+    var mo = store.moments.filter(function(x){ return x.id===tmid; })[0];
+    if (mo) {
+      mo.pub = (mo.pub === false);
+      saveStore(); renderMoments();
+      toast(mo.pub === false ? T("已转为私密","Now private") : T("已转为公开","Now public"));
+    }
+    return;
+  }
+
   var dm = t.closest("[data-delmo]");
   if (dm) {
     var mid = dm.getAttribute("data-delmo");
@@ -2025,6 +2057,17 @@ document.addEventListener("click", function(e){
   if (dfb) {
     store.feedback.splice(+dfb.getAttribute("data-delfb"), 1);
     saveStore(); renderFb(); toast(T("已删除反馈","Feedback deleted"));
+    return;
+  }
+
+  var tl = t.closest("[data-toglink]");
+  if (tl) {
+    var tli = +tl.getAttribute("data-toglink");
+    if (store.links[tli]) {
+      store.links[tli].pub = (store.links[tli].pub === false);
+      saveStore(); renderLinks();
+      toast(store.links[tli].pub === false ? T("已转为私密","Now private") : T("已转为公开","Now public"));
+    }
     return;
   }
 
@@ -2231,6 +2274,10 @@ var STR = {
   adminBg: ["管理员 · 网页背景", "Admin · Site background"],
   adminMusic: ["管理员 · 音乐管理", "ADMIN · Music library"],
   musicAddBtn: ["上传歌曲", "Upload tracks"],
+  adminSite: ["管理员 · 站点设置", "ADMIN · Site settings"],
+  musicBuiltinTag: ["内置曲目（可禁用/恢复）", "Built-in tracks (disable / enable)"],
+  pubYes: ["公开（所有人可见）", "Public (visible to everyone)"],
+  pubNo: ["私密（仅管理模式可见）", "Private (admin mode only)"],
   musicHint: ["支持 mp3 / m4a / ogg 等常见音频格式，可多选；歌曲仅保存在当前浏览器（不随数据备份导出），播放时与内置 6 首一起进入随机池。", "Common audio formats (mp3 / m4a / ogg), multi-select; tracks stay in this browser only (not included in data backups) and join the random pool with the 6 built-in tracks."],
   adminPhoto: ["管理员 · 档案照片", "ADMIN · Archive photo"],
   photoUrlPh: ["图片链接（可选）", "Image URL (optional)"],
@@ -2766,9 +2813,11 @@ function doSearch(q){
     });
   });
   store.moments.forEach(function(m){
+    if (m.pub === false) return; /* 私密动态不进搜索 */
     idx.push({ page:"moments", tag:T("动态","Moment"), title:(m.text||"").slice(0,36), sub:fmt(m.time), hay:(m.text||"").toLowerCase() });
   });
   store.links.forEach(function(x){
+    if (x.pub === false) return; /* 私密网址不进搜索 */
     idx.push({ page:"repo", tag:T("网址","Link"), title:x.url, sub:(x.note||""), hay:(x.url+" "+(x.note||"")).toLowerCase() });
   });
   var hits = idx.filter(function(it){ return it.hay.indexOf(q) !== -1; }).slice(0, 8);
@@ -3760,6 +3809,9 @@ $("fxSave").addEventListener("click", function () {
     { name: "Fairytale Waltz", src: "bgm/Fairytale Waltz.mp3" }
   ];
   var LS_MUSIC = "lujiaxi_music_list_v1";
+  var LS_MUSIC_OFF = "lujiaxi_music_builtin_off";
+  function mxOffGet() { try { return JSON.parse(localStorage.getItem(LS_MUSIC_OFF) || "[]"); } catch (e) { return []; } }
+  function mxOffSave(l) { try { localStorage.setItem(LS_MUSIC_OFF, JSON.stringify(l)); } catch (e) {} }
   var mxDbP = null;
   function mxDb() {
     if (mxDbP) return mxDbP;
@@ -3814,7 +3866,9 @@ $("fxSave").addEventListener("click", function () {
   var mxCur = null; /* 当前曲目 { kind: "builtin"|"user", name, src|id } */
 
   function mxPool() {
-    var b = MUSIC_BUILTINS.map(function (t) { return { kind: "builtin", name: t.name, src: t.src }; });
+    var off = mxOffGet();
+    var b = MUSIC_BUILTINS.filter(function (t) { return off.indexOf(t.name) < 0; })
+      .map(function (t) { return { kind: "builtin", name: t.name, src: t.src }; });
     var u = mxListGet().map(function (it) { return { kind: "user", name: it.name, id: it.id }; });
     return b.concat(u);
   }
@@ -3857,7 +3911,11 @@ $("fxSave").addEventListener("click", function () {
       go(u);
     }).catch(function () { go(null); });
   }
-  function mxPlayRandom() { mxPlayItem(mxPick()); }
+  function mxPlayRandom() {
+    var it = mxPick();
+    if (!it) { toast(T("曲池是空的：请在管理面板恢复内置曲目或上传歌曲", "Pool empty: restore built-ins or upload tracks in admin")); return; }
+    mxPlayItem(it);
+  }
 
   var bp = $("musicPlay"), bn = $("musicNext"), bs = $("musicStop");
   if (bp) bp.addEventListener("click", function () {
@@ -3955,7 +4013,46 @@ $("fxSave").addEventListener("click", function () {
       });
     });
   });
+  /* ---- 内置曲目禁用/恢复 ---- */
+  window.renderMusicBuiltin = function () {
+    var box = $("musicBuiltinList");
+    if (!box) return;
+    var off = mxOffGet();
+    box.innerHTML = "";
+    MUSIC_BUILTINS.forEach(function (t) {
+      var isOff = off.indexOf(t.name) >= 0;
+      var row = document.createElement("div");
+      row.className = "music-row" + (isOff ? " music-off" : "");
+      var nm = document.createElement("span");
+      nm.className = "music-row-name";
+      nm.textContent = "\uD83C\uDFB5 " + t.name;
+      var st = document.createElement("span");
+      st.className = "muted music-row-size";
+      st.textContent = isOff ? T("已禁用", "off") : T("启用中", "on");
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "btn sm ghost";
+      btn.textContent = isOff ? T("恢复", "Enable") : T("禁用", "Disable");
+      btn.addEventListener("click", function () {
+        var l = mxOffGet();
+        if (isOff) {
+          l = l.filter(function (n) { return n !== t.name; });
+        } else {
+          l.push(t.name);
+          if (mxCur && mxCur.kind === "builtin" && mxCur.name === t.name) {
+            audio.pause(); audio.removeAttribute("src"); audio.load(); mxIdle();
+          }
+        }
+        mxOffSave(l);
+        window.renderMusicBuiltin();
+        toast(isOff ? T("已恢复：" + t.name, "Enabled: " + t.name) : T("已禁用：" + t.name + "（仍保留在曲库文件中）", "Disabled: " + t.name));
+      });
+      row.appendChild(nm); row.appendChild(st); row.appendChild(btn);
+      box.appendChild(row);
+    });
+  };
   window.renderMusicList();
+  window.renderMusicBuiltin();
   mxIdle();
 })();
 
