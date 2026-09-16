@@ -294,6 +294,8 @@
   body.light .tmsg .txt { background: #e9edf5; }
   body.light .tmsg.visitor .txt { background: #f6f8fb; }
   body.light footer { color: #8a92a2; }
+  .music-credit { margin-top: 6px; text-align: center; color: #5c626e; font-size: 11px; opacity: .75; }
+  body.light .music-credit { color: #8a92a2; }
   body.light .search-drop { box-shadow: 0 12px 30px rgba(30,40,60,.18); }
 
   /* ===== 自定义网页背景 ===== */
@@ -765,6 +767,12 @@
   .fxd-btn .w { font-size: 9.5px; color: var(--muted); }
   .fxd-stop { margin-top: 10px; width: 100%; padding: 7px; background: var(--card-2); border: 1px solid var(--line); border-radius: 9px; color: var(--muted); font-size: 12.5px; cursor: pointer; font-family: inherit; }
   .fxd-stop:hover { color: var(--danger); border-color: var(--danger); }
+  .fxd-btnrow { display: flex; gap: 6px; margin-top: 10px; }
+  .fxd-mini { flex: 1; padding: 7px 4px; background: var(--card-2); border: 1px solid var(--line); border-radius: 9px; color: var(--text); font-size: 12px; cursor: pointer; font-family: inherit; white-space: nowrap; }
+  .fxd-mini:hover { border-color: var(--accent); color: var(--accent); }
+  .music-row { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px dashed var(--line); font-size: 13px; }
+  .music-row-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .music-row-size { font-size: 12px; flex-shrink: 0; }
   @media (max-width: 640px) { .fxd-panel { width: 200px; } }
 /* ===== 悬浮球分身（背景切换 / 音乐占位） ===== */
   .fxd-stack { position: relative; width: 56px; height: 56px; flex: 0 0 56px; transition: transform .28s ease; }
@@ -827,7 +835,7 @@
 <div id="fxDock">
   <div class="fxd-stack" id="fxdStack">
     <button class="fxd-sat above" id="fxdSatA" type="button" title="背景切换">🎨</button>
-    <button class="fxd-sat below" id="fxdSatB" type="button" title="音乐播放（下版本）">🎵</button>
+    <button class="fxd-sat below" id="fxdSatB" type="button" title="音乐播放">🎵</button>
     <div class="fxd-ball" id="fxdBall" title="粒子天气"><span id="fxdIcon">✦</span></div>
   </div>
   <div class="fxd-panel" id="fxdPanel">
@@ -850,8 +858,12 @@
   </div>
   <div class="fxd-panel" id="fxdPanelMusic" hidden>
     <div class="fxd-title mono">音乐播放 · MUSIC</div>
-    <div class="fxd-status" style="color:var(--muted)">🎵 功能占位 — 下个版本上线，敬请期待</div>
-    <button class="fxd-stop" type="button" disabled style="opacity:.45; cursor:not-allowed">▶ 播放（占位）</button>
+    <div class="fxd-status" id="musicStatus" style="color:var(--muted)">未在播放</div>
+    <div class="fxd-btnrow">
+      <button class="fxd-mini" id="musicPlay" type="button">▶ 播放</button>
+      <button class="fxd-mini" id="musicNext" type="button">⏭ 切歌</button>
+      <button class="fxd-mini" id="musicStop" type="button">⏹ 停止</button>
+    </div>
   </div>
 </div>
   <div id="neonCursor" aria-hidden="true"></div>
@@ -1021,6 +1033,20 @@
           </div>
           <div id="bgThumbs" style="display:flex;gap:8px;flex-wrap:wrap"></div>
           <p class="note" data-i18n="bgHint">最多 25 张；每次打开网页随机选一张，之后每 2~3 分钟自动淡入淡出切换。上传本地图片会自动裁掉黑边并压缩优化（不限原始大小，仅保存在当前浏览器），也可直接粘贴图片链接。</p>
+        </div>
+      </div>
+
+      <div class="admin-panel" id="musicAdminPanel">
+        <div class="admin-tag" data-i18n="adminMusic">管理员 · 音乐管理</div>
+        <div class="formgrid" style="margin-top:12px">
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <input type="file" id="musicFile" accept="audio/*" multiple style="flex:1;min-width:200px">
+          </div>
+          <div style="display:flex;gap:10px">
+            <button class="btn sm" id="musicAdd" data-i18n="musicAddBtn">上传歌曲</button>
+          </div>
+          <div id="musicList"></div>
+          <p class="note" data-i18n="musicHint">支持 mp3 / m4a / ogg 等常见音频格式，可多选；歌曲仅保存在当前浏览器（不随数据备份导出），播放时与内置 6 首一起进入随机池。</p>
         </div>
       </div>
 
@@ -1302,6 +1328,7 @@
   </section>
 
   <footer data-i18n="footer">© CoCo · 个人主页 · 第一版原型</footer>
+  <div class="music-credit">Music: "At Rest", "Wholesome", "Gymnopedie No 1", "Canon in D Major", "Dance of the Sugar Plum Fairy", "Fairytale Waltz" by Kevin MacLeod (incompetech.com) · Licensed under CC BY 4.0</div>
 </div>
 
 <!-- 管理员登录/设置 -->
@@ -2202,6 +2229,9 @@ var STR = {
   confirm: ["确认", "Confirm"],
   modalNote: ["原型说明：为本地演示的简单密码验证，真正的多用户权限需要后端。", "Prototype note: simple local password check; real multi-user auth needs a backend."],
   adminBg: ["管理员 · 网页背景", "Admin · Site background"],
+  adminMusic: ["管理员 · 音乐管理", "ADMIN · Music library"],
+  musicAddBtn: ["上传歌曲", "Upload tracks"],
+  musicHint: ["支持 mp3 / m4a / ogg 等常见音频格式，可多选；歌曲仅保存在当前浏览器（不随数据备份导出），播放时与内置 6 首一起进入随机池。", "Common audio formats (mp3 / m4a / ogg), multi-select; tracks stay in this browser only (not included in data backups) and join the random pool with the 6 built-in tracks."],
   adminPhoto: ["管理员 · 档案照片", "ADMIN · Archive photo"],
   photoUrlPh: ["图片链接（可选）", "Image URL (optional)"],
   photoApply: ["更换照片", "Apply photo"],
@@ -3556,7 +3586,7 @@ $("fxSave").addEventListener("click", function () {
   var FXD_MODES = {
     fx: { icon: "✦", title: "粒子天气" },
     bg: { icon: "🎨", title: "背景切换" },
-    music: { icon: "🎵", title: "音乐播放（下版本）" }
+    music: { icon: "🎵", title: "音乐播放" }
   };
   var fxdOrder = ["fx", "bg", "music"];
   window.fxdMode = "fx";
@@ -3715,6 +3745,218 @@ $("fxSave").addEventListener("click", function () {
   if (tb) tb.addEventListener("click", function () { setTimeout(function () { window.bgSolidApply(); }, 20); });
 
   window.fxdRender();
+})();
+
+
+/* ===== 音乐播放（悬浮球 MUSIC）+ 管理员音乐管理 ===== */
+(function () {
+  /* 内置曲库（Kevin MacLeod · CC BY 4.0 · incompetech.com），文件在 bgm/ 目录 */
+  var MUSIC_BUILTINS = [
+    { name: "At Rest", src: "bgm/At Rest.mp3" },
+    { name: "Wholesome", src: "bgm/Wholesome.mp3" },
+    { name: "Gymnopedie No 1", src: "bgm/Gymnopedie No 1.mp3" },
+    { name: "Canon in D Major", src: "bgm/Canon in D Major.mp3" },
+    { name: "Dance of the Sugar Plum Fairy", src: "bgm/Dance of the Sugar Plum Fairy.mp3" },
+    { name: "Fairytale Waltz", src: "bgm/Fairytale Waltz.mp3" }
+  ];
+  var LS_MUSIC = "lujiaxi_music_list_v1";
+  var mxDbP = null;
+  function mxDb() {
+    if (mxDbP) return mxDbP;
+    mxDbP = new Promise(function (res, rej) {
+      var rq = indexedDB.open("coco-music", 1);
+      rq.onupgradeneeded = function () { rq.result.createObjectStore("tracks"); };
+      rq.onsuccess = function () { res(rq.result); };
+      rq.onerror = function () { rej(rq.error); };
+    });
+    return mxDbP;
+  }
+  function mxIdbPut(id, blob) {
+    return mxDb().then(function (db) {
+      return new Promise(function (res, rej) {
+        var tx = db.transaction("tracks", "readwrite");
+        tx.objectStore("tracks").put(blob, id);
+        tx.oncomplete = res;
+        tx.onerror = function () { rej(tx.error); };
+      });
+    });
+  }
+  function mxIdbGet(id) {
+    return mxDb().then(function (db) {
+      return new Promise(function (res, rej) {
+        var rq = db.transaction("tracks", "readonly").objectStore("tracks").get(id);
+        rq.onsuccess = function () { res(rq.result || null); };
+        rq.onerror = function () { rej(rq.error); };
+      });
+    });
+  }
+  function mxIdbDel(id) {
+    return mxDb().then(function (db) {
+      return new Promise(function (res) {
+        var tx = db.transaction("tracks", "readwrite");
+        tx.objectStore("tracks").delete(id);
+        tx.oncomplete = res;
+        tx.onerror = res;
+      });
+    }).catch(function () {});
+  }
+  function mxListGet() {
+    try { return JSON.parse(localStorage.getItem(LS_MUSIC) || "[]"); } catch (e) { return []; }
+  }
+  function mxListSave(l) {
+    try { localStorage.setItem(LS_MUSIC, JSON.stringify(l)); return true; }
+    catch (e) { toast(T("存储空间不足", "Storage full")); return false; }
+  }
+
+  var audio = new Audio();
+  audio.volume = 0.8; /* 固定音量，不喧宾夺主；想改大小调这里 */
+  var mxObjUrls = {};
+  var mxCur = null; /* 当前曲目 { kind: "builtin"|"user", name, src|id } */
+
+  function mxPool() {
+    var b = MUSIC_BUILTINS.map(function (t) { return { kind: "builtin", name: t.name, src: t.src }; });
+    var u = mxListGet().map(function (it) { return { kind: "user", name: it.name, id: it.id }; });
+    return b.concat(u);
+  }
+  function mxStatus(txt) { var el = $("musicStatus"); if (el) el.textContent = txt; }
+  function mxRefreshBtn() {
+    var bp = $("musicPlay"); if (!bp) return;
+    bp.textContent = (mxCur && !audio.paused) ? T("⏸ 暂停", "⏸ Pause") : T("▶ 播放", "▶ Play");
+  }
+  function mxIdle() {
+    mxCur = null;
+    mxStatus(T("未在播放", "Not playing"));
+    mxRefreshBtn();
+  }
+  /* 随机挑一首（曲池 >1 时避免与当前重复） */
+  function mxPick() {
+    var p = mxPool();
+    if (!p.length) return null;
+    var r, guard = 0;
+    do { r = p[Math.floor(Math.random() * p.length)]; guard++; }
+    while (p.length > 1 && mxCur && r.name === mxCur.name && guard < 40);
+    return r;
+  }
+  function mxPlayItem(item) {
+    if (!item) return;
+    mxCur = item;
+    function go(src) {
+      if (!src) { toast(T("读取失败：曲目可能已被删除", "Load failed: track may be deleted")); mxIdle(); return; }
+      audio.src = src;
+      var pr = audio.play();
+      if (pr && pr.catch) pr.catch(function () {});
+      mxStatus("🎵 " + item.name);
+      mxRefreshBtn();
+    }
+    if (item.kind === "builtin") { go(item.src); return; }
+    if (mxObjUrls[item.id]) { go(mxObjUrls[item.id]); return; }
+    mxIdbGet(item.id).then(function (blob) {
+      if (!blob) { go(null); return; }
+      var u = URL.createObjectURL(blob);
+      mxObjUrls[item.id] = u;
+      go(u);
+    }).catch(function () { go(null); });
+  }
+  function mxPlayRandom() { mxPlayItem(mxPick()); }
+
+  var bp = $("musicPlay"), bn = $("musicNext"), bs = $("musicStop");
+  if (bp) bp.addEventListener("click", function () {
+    if (mxCur && !audio.paused) { /* 播放中 → 暂停 */
+      audio.pause();
+      mxStatus("⏸ " + mxCur.name);
+      mxRefreshBtn();
+      return;
+    }
+    if (mxCur && audio.paused && audio.getAttribute("src")) { /* 暂停中 → 继续 */
+      var pr = audio.play();
+      if (pr && pr.catch) pr.catch(function () {});
+      mxStatus("🎵 " + mxCur.name);
+      mxRefreshBtn();
+      return;
+    }
+    mxPlayRandom(); /* 停止状态 → 随机开播 */
+  });
+  if (bn) bn.addEventListener("click", function () { mxPlayRandom(); });
+  if (bs) bs.addEventListener("click", function () {
+    audio.pause();
+    audio.removeAttribute("src");
+    audio.load();
+    mxIdle();
+  });
+  audio.addEventListener("ended", function () { mxPlayRandom(); }); /* 播完自动随机下一首 */
+  audio.addEventListener("error", function () {
+    if (!mxCur || !audio.getAttribute("src")) return;
+    toast(T("播放失败：" + mxCur.name + "（文件缺失或网络错误）", "Playback failed: " + mxCur.name));
+    mxIdle();
+  });
+
+  /* ---- 管理员：上传 / 列表 / 删除 ---- */
+  function mxFmt(n) { return n >= 1048576 ? (n / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(n / 1024)) + " KB"; }
+  window.renderMusicList = function () {
+    var box = $("musicList");
+    if (!box) return;
+    box.innerHTML = "";
+    var list = mxListGet();
+    if (!list.length) {
+      var p = document.createElement("p");
+      p.className = "note muted";
+      p.textContent = T("还没有上传的歌曲", "No uploaded tracks yet");
+      box.appendChild(p);
+      return;
+    }
+    list.forEach(function (it) {
+      var row = document.createElement("div");
+      row.className = "music-row";
+      var nm = document.createElement("span");
+      nm.className = "music-row-name";
+      nm.textContent = "🎵 " + it.name;
+      var sz = document.createElement("span");
+      sz.className = "muted music-row-size";
+      sz.textContent = mxFmt(it.size || 0);
+      var del = document.createElement("button");
+      del.type = "button";
+      del.className = "btn sm ghost";
+      del.textContent = T("删除", "Delete");
+      del.addEventListener("click", function () {
+        if (mxCur && mxCur.kind === "user" && mxCur.id === it.id) {
+          audio.pause(); audio.removeAttribute("src"); audio.load(); mxIdle();
+        }
+        mxIdbDel(it.id);
+        if (mxObjUrls[it.id]) { URL.revokeObjectURL(mxObjUrls[it.id]); delete mxObjUrls[it.id]; }
+        var l = mxListGet().filter(function (x) { return x.id !== it.id; });
+        mxListSave(l);
+        window.renderMusicList();
+        toast(T("已删除：" + it.name, "Deleted: " + it.name));
+      });
+      row.appendChild(nm); row.appendChild(sz); row.appendChild(del);
+      box.appendChild(row);
+    });
+  };
+  var mAdd = $("musicAdd"), mFile = $("musicFile");
+  if (mAdd && mFile) mAdd.addEventListener("click", function () {
+    if (!am) { toast(T("请先进入管理模式", "Enter admin mode first")); return; }
+    var files = Array.prototype.slice.call(mFile.files || []);
+    if (!files.length) { toast(T("先选择音频文件", "Pick audio files first")); return; }
+    var added = 0, done = 0, errs = 0;
+    files.forEach(function (f) {
+      var id = "mx" + Date.now() + "_" + Math.floor(Math.random() * 1e6);
+      mxIdbPut(id, f).then(function () {
+        var l = mxListGet();
+        l.push({ id: id, name: f.name.replace(/\.[^.]+$/, ""), size: f.size, at: Date.now() });
+        if (mxListSave(l)) added++;
+      }).catch(function (e) { console.error("音乐上传失败:", f.name, e); errs++; }).then(function () {
+        done++;
+        if (done === files.length) {
+          mFile.value = "";
+          window.renderMusicList();
+          if (added) toast(T("已上传 " + added + " 首歌曲", added + " track(s) uploaded"));
+          if (errs) toast(T("失败 " + errs + " 首", errs + " failed"));
+        }
+      });
+    });
+  });
+  window.renderMusicList();
+  mxIdle();
 })();
 
 loadFxPanel();
