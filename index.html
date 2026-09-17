@@ -8,6 +8,7 @@
 <!-- 数据文件（可选）：在管理模式里点「导出数据文件」生成 site-data.js，放到本文件同目录，
      站点就会优先读取它。这样即使版本更新、换浏览器或清空了浏览器数据，你的调整也不会丢。 -->
 <script src="site-data.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root {
     --bg: #0a0b0d;
@@ -778,12 +779,12 @@
   .moment.is-priv, .repo-item.is-priv { opacity: .72; }
   .pubrow { display: flex; gap: 16px; flex-wrap: wrap; }
   .site-settings { padding: 14px; border: 1px dashed var(--line); border-radius: 14px; background: var(--card); margin: 16px 0; }
-  @media (max-width: 640px) { .fxd-panel { width: 200px; } }
+  @media (max-width: 640px) { .fxd-panel { width: min(200px, calc(100vw - 76px)); } }
 /* ===== 悬浮球分身（背景切换 / 音乐占位） ===== */
   .fxd-stack { position: relative; width: 56px; height: 56px; flex: 0 0 56px; transition: transform .28s ease; }
   .fxd-sat { position: absolute; left: 0; top: 0; width: 56px; height: 56px; border-radius: 50%; background: var(--card); border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; font-family: inherit; padding: 0; opacity: 0; transform: translateY(0) scale(.3); pointer-events: none; transition: transform .3s cubic-bezier(.25,.9,.3,1.2), opacity .22s ease; z-index: 1; box-shadow: 4px 6px 18px rgba(0,0,0,.22); }
-  #fxDock:hover .fxd-sat.above, #fxDock.open .fxd-sat.above { opacity: 1; transform: translateY(-64px) scale(1); pointer-events: auto; }
-  #fxDock:hover .fxd-sat.below, #fxDock.open .fxd-sat.below { opacity: 1; transform: translateY(64px) scale(1); pointer-events: auto; }
+  #fxdStack:hover .fxd-sat.above, #fxDock.open .fxd-sat.above { opacity: 1; transform: translateY(-64px) scale(1); pointer-events: auto; }
+  #fxdStack:hover .fxd-sat.below, #fxDock.open .fxd-sat.below { opacity: 1; transform: translateY(64px) scale(1); pointer-events: auto; }
   .fxd-sat:hover { border-color: var(--accent); }
   .fxd-sat.swap-in { transform: translateY(0) scale(1.08) !important; opacity: 1 !important; z-index: 3; pointer-events: none; }
   .fxd-stack.swap-out .fxd-ball { transform: translateY(var(--swapY, 64px)) scale(.45) !important; opacity: 0; }
@@ -797,6 +798,37 @@
   .fxd-rec a { color: var(--accent); cursor: pointer; text-decoration: underline; }
 /* 纯色模式：背景图整体淡出，露出 body 底色（规则放最后，压住 body.light 的透明度） */
   body.bg-solid #bgLayer { opacity: 0; }
+
+/* ===== 悬浮球热区收紧（2026-09-17，用户反馈选中范围过大） =====
+   原 #fxDock 为 flex 行：隐形面板（236px、仅 opacity 0）仍占据布局，
+   使悬停/触摸触发区 ≈ 300×200px。现将面板改为绝对定位脱离文档流，
+   dock 盒子收缩为球体本身（56px）；卫星触发源改为 #fxdStack:hover；
+   两条「悬停桥」只在激活后出现，保证鼠标能移到卫星/面板不掉状态。 */
+  #fxDock { display: block; }
+  .fxd-panel { position: absolute; left: 66px; top: 50%; transform: translateY(-50%) translateX(-18px); }
+  #fxDock:hover .fxd-panel, #fxDock.open .fxd-panel { transform: translateY(-50%) translateX(0); }
+  #fxDock.fxd-flip .fxd-panel { left: auto; right: 66px; }
+  #fxdStack:hover::before, #fxDock.open .fxd-stack::before {
+    content: ""; position: absolute; left: 6px; right: 6px; top: -70px; bottom: -70px; }
+  #fxDock:hover::after, #fxDock.open::after {
+    content: ""; position: absolute; left: 56px; top: -10px; bottom: -10px; width: 14px; }
+  #fxDock.fxd-flip:hover::after, #fxDock.fxd-flip.open::after { left: auto; right: 56px; }
+  .fxd-ball { touch-action: none; -webkit-user-select: none; user-select: none; }
+  #fxDock.fxd-pt .fxd-panel { top: -6px; transform: translateY(0) translateX(-18px); }
+  #fxDock.fxd-pt:hover .fxd-panel, #fxDock.fxd-pt.open .fxd-panel { transform: translateY(0) translateX(0); }
+  #fxDock.fxd-pb .fxd-panel { top: auto; bottom: -6px; transform: translateY(0) translateX(-18px); }
+  #fxDock.fxd-pb:hover .fxd-panel, #fxDock.fxd-pb.open .fxd-panel { transform: translateY(0) translateX(0); }
+/* ===== 手机端适配补充 ===== */
+  @media (max-width: 560px) {
+    .nav-in { flex-wrap: wrap; row-gap: 4px; padding: 10px 14px; }
+    .nav-admin { margin-left: 0; }
+    .admin-bar { padding: 8px 14px; }
+    /* iOS：输入框字号 <16px 聚焦会自动放大页面 */
+    .chat-input input, .modal input, input[type=text], textarea, select { font-size: 16px; }
+  }
+  @media (max-width: 380px) {
+    .nav-search input[type=text] { width: 76px; }
+  }
 </style>
 </head>
 <body>
@@ -1168,7 +1200,7 @@
       <div class="sec-head"><span class="sec-no">SEC.07</span></div>
       <h2><span class="dot"></span><span data-i18n="fbTitle">意见箱</span></h2>
       <div class="sec-sub" data-i18n="fbSub">Feedback Box · 建议收集</div>
-      <p class="note" style="margin-bottom:12px" data-i18n="fbNote">对这个网站有什么建议或想法？写下来投给我，我会认真看。（第一版原型：反馈保存在当前浏览器。）</p>
+      <p class="note" style="margin-bottom:12px" data-i18n="fbNote">对这个网站有什么建议或想法？写下来投给我，我会认真看。（反馈会直接投递到我的后端信箱。）</p>
       <div class="formgrid">
         <textarea id="fbInp" rows="3" data-i18n-ph="fbPh" placeholder="写下你的建议…"></textarea>
         <div style="display:flex;gap:10px">
@@ -1243,7 +1275,7 @@
       </div>
 
       <div class="h3" data-i18n="chatTitle">聊聊天</div>
-      <p class="note" style="margin-bottom:12px" data-i18n="chatNote">给我留句话吧。你可以表达疑问、想聊的话题，或者纯粹打个招呼。（第一版原型：数据保存在当前浏览器，真正的"跨设备私聊"需要后端支持。）</p>
+      <p class="note" style="margin-bottom:12px" data-i18n="chatNote">给我留句话吧。你可以表达疑问、想聊的话题，或者纯粹打个招呼。（留言会直达我的后端，回复后会出现在这里。）</p>
 
       <div id="visitorChat">
         <div class="chat-log" id="myLog"></div>
@@ -1557,16 +1589,45 @@ function render() {
   renderAdminUI();
 }
 
+/* ---- 意见箱 · Supabase 后端（可选，未配置时自动降级本地） ----
+   配置：1) supabase.com 建项目，拿到 Project URL 与 anon key（Settings → API）
+        2) SQL Editor 执行建表 + RLS 语句（见对话说明）
+        3) 把下方 SB_URL / SB_ANON 两个占位符替换成你的值，重新加载页面
+   未配置时，站点完全保持原来的本地 localStorage 行为。 */
+var SB_URL = "https://nomfhwsjdqmjybehtfaf.supabase.co";
+var SB_ANON = "sb_publishable_EHraUk7v5TCRjFARxy-jzg_iCnt5HQC";
+var SB_TABLE = "feedback";
+var __sb = null, __fbRemote = null;
+function sbReady() {
+  if (__sb) return true;
+  if (!SB_URL || SB_URL.charAt(0) === "_" || !SB_ANON || SB_ANON.charAt(0) === "_") return false;
+  if (typeof supabase === "undefined") return false;
+  try { __sb = supabase.createClient(SB_URL, SB_ANON, { global: { headers: { "x-vid": visitorId() } } }); return true; } catch (e) { return false; }
+}
+function fbPull() {
+  if (!sbReady()) return;
+  __sb.from(SB_TABLE).select("id,text,created_at").order("created_at", { ascending: false }).limit(300)
+    .then(function (r) {
+      if (r.error) { console.warn("fb pull:", r.error.message); return; }
+      __fbRemote = (r.data || []).map(function (x) { return { id: x.id, text: x.text, time: Date.parse(x.created_at) || Date.now() }; });
+      renderFb();
+    }).catch(function (e) { console.warn("fb pull failed:", e); });
+}
+
 /* ---- 意见箱 ---- */
 function renderFb() {
-  if (!store.feedback.length) {
+  var remote = __fbRemote && __fbRemote.length;
+  var list = remote ? __fbRemote : store.feedback;
+  if (!list.length) {
     $("fbList").innerHTML = '<p class="muted">'+T("暂时还没有反馈。","No feedback yet.")+'</p>';
     return;
   }
-  $("fbList").innerHTML = store.feedback.map(function(f,i){ return { f:f, i:i }; }).reverse().map(function(x){
+  $("fbList").innerHTML = list.map(function(f,i){ return { f:f, i:i }; }).reverse().map(function(x){
+    var delBtn = "";
+    if (!remote) delBtn = '<button class="btn sm ghost" data-delfb="'+x.i+'" style="color:var(--danger)">'+T("删除","Delete")+'</button>';
+    else if (am) delBtn = '<button class="btn sm ghost" data-delfbr="'+x.f.id+'" style="color:var(--danger)">'+T("删除","Delete")+'</button>';
     return '<div class="tmsg visitor"><div class="txt">'+esc(x.f.text).replace(/\n/g,"<br>")+
-      '<div class="muted" style="font-size:11px">'+fmt(x.f.time)+'</div></div>'+
-      '<button class="btn sm ghost" data-delfb="'+x.i+'" style="color:var(--danger)">'+T("删除","Delete")+'</button></div>';
+      '<div class="muted" style="font-size:11px">'+fmt(x.f.time)+'</div></div>'+delBtn+'</div>';
   }).join("");
 }
 
@@ -1658,6 +1719,73 @@ function renderTable(arr, type) {
   return '<table><thead><tr><th>'+T("方式","Method")+'</th><th>'+T("内容","Detail")+'</th><th></th></tr></thead><tbody>'+rows+'</tbody></table>';
 }
 
+/* ---- 聊聊天 · Supabase 后端（未配置时自动降级本地） ----
+   访客消息存 chat_messages（RLS 按 x-vid 隔离）；公开气泡存 chat_snippets；
+   管理端操作（线程/回复/删除/公开）走 fb-admin 函数（密码鉴权）。 */
+var __chatMine = null;   /* 后端：我的线程 [{id,from,text,time}] */
+var __snippets = null;   /* 后端：公开气泡 [{id,src,text,time}] */
+var __chatAll = null;    /* 后端：管理端 {threads, msgs} */
+
+function chatPullMine() {
+  if (!sbReady()) return;
+  __sb.from("chat_messages").select("id,sender,text,created_at").order("created_at", { ascending: true }).limit(500)
+    .then(function (r) {
+      if (r.error) { console.warn("chat pull:", r.error.message); return; }
+      __chatMine = (r.data || []).map(function (x) { return { id: x.id, from: x.sender, text: x.text, time: Date.parse(x.created_at) || Date.now() }; });
+      renderChat();
+    }).catch(function () {});
+}
+function snippetsPull() {
+  if (!sbReady()) return;
+  __sb.from("chat_snippets").select("id,src_id,text,created_at").order("created_at", { ascending: false }).limit(100)
+    .then(function (r) {
+      if (r.error) { console.warn("snip pull:", r.error.message); return; }
+      __snippets = (r.data || []).map(function (x) { return { id: x.id, src: x.src_id, text: x.text, time: Date.parse(x.created_at) || Date.now() }; });
+      renderBubbles();
+    }).catch(function () {});
+}
+function adminInvoke(body, onOk, quiet) {
+  if (!sbReady()) { if (!quiet) toast(T("后端未连接","Backend offline")); return; }
+  var pass = "";
+  try { pass = localStorage.getItem(LS_ADMIN) || ""; } catch (e) {}
+  if (!pass) { if (!quiet) toast(T("未找到管理密码","Admin password missing")); return; }
+  body.pass = pass;
+  __sb.functions.invoke("fb-admin", { body: body }).then(function (r) {
+    if (r.error || (r.data && !r.data.ok)) { if (!quiet) toast(T("操作失败，请稍后再试","Failed, try later")); return; }
+    if (onOk) onOk(r.data || {});
+  }).catch(function () { if (!quiet) toast(T("操作失败，请稍后再试","Failed, try later")); });
+}
+function chatAdminPull() {
+  if (!am) return;
+  adminInvoke({ action: "chat_all" }, function (d) {
+    __chatAll = { threads: d.threads || [], msgs: d.messages || {} };
+    renderThreads();
+  }, true);
+}
+function renderThreadsRemote() {
+  var th = __chatAll.threads;
+  if (!th.length) {
+    $("threads").innerHTML = '<p class="muted">'+T("暂时还没有访客留言。","No visitor messages yet.")+'</p>';
+    return;
+  }
+  $("threads").innerHTML = th.map(function (v) {
+    var msgs = (__chatAll.msgs[v.vid] || []).map(function (m) {
+      var pub = "";
+      if (m.sender === "visitor") {
+        pub = '<button class="pub" data-rpub="'+m.id+'" '+(m.pub?'disabled':'')+'>'+(m.pub?T("已公开","Published"):T("匿名公开","Publish anon"))+'</button>';
+      }
+      return '<div class="tmsg'+(m.sender==="visitor"?" visitor":"")+'">'+
+        '<div class="txt">'+esc(m.text)+'<div class="muted" style="font-size:11px">'+fmt(Date.parse(m.created_at)||Date.now())+(m.sender==="admin"?T(" · 我"," · me"):"")+"</div></div>"+
+        pub+'<button class="pub" data-rdel="'+m.id+'" style="color:var(--danger)">'+T("删除","Delete")+'</button>'+"</div>";
+    }).join("");
+    return '<div class="thread" data-tid="'+esc(v.vid)+'">'+
+      '<div class="thead" data-toggle="'+esc(v.vid)+'"><b>'+esc(v.name||T("匿名访客","Anonymous"))+'</b><span class="prev">'+esc(v.lastText||"")+'</span><span class="muted">'+v.count+T("条"," msg")+"</span></div>"+
+      '<div class="tbody">'+msgs+
+      '<div class="reply"><input type="text" data-rreply="'+esc(v.vid)+'" placeholder="'+T("以管理员身份回复…","Reply as admin…")+'"><button class="btn sm" data-rsend="'+esc(v.vid)+'">'+T("回复","Reply")+'</button></div>'+
+      "</div></div>";
+  }).join("");
+}
+
 /* ---- 访客聊天 ---- */
 function myThread() {
   var vid = visitorId();
@@ -1669,29 +1797,49 @@ function myThread() {
   return t;
 }
 function renderChat() {
-  var t = myThread();
   var log = $("myLog");
-  if (!t.thread.length) {
+  var thread = __chatMine || myThread().thread;
+  if (!thread.length) {
     log.innerHTML = '<div class="msg bot">'+T("👋 嗨，我在这里。想聊点什么直接说～（如果回复了会在下面出现）","👋 Hi, I am here. Say anything — replies will show up below.")+'</div>';
     return;
   }
-  log.innerHTML = t.thread.map(function(m){
+  log.innerHTML = thread.map(function(m){
     var cls = m.from==="admin" ? "me" : "bot";
     return '<div class="msg '+cls+'">'+esc(m.text)+'<time>'+fmt(m.time)+"</time></div>";
   }).join("");
   log.scrollTop = log.scrollHeight;
 }
-function sendMine() {
-  var inp = $("myInp"); var text = inp.value.trim(); if (!text) return;
-  var name = $("myName").value.trim();
+function sendMineLocal(text, name) {
   var t = myThread(); t.name = name; t.last = Date.now();
   t.thread.push({ from:"visitor", text: text, time: Date.now() });
-  saveStore(); inp.value = ""; renderChat();
-  toast((name? name+(LANG==="en"?", ":"，"):"")+T("已发送，留言已送达。","Sent — message delivered."));
+  saveStore(); $("myInp").value = ""; renderChat();
+}
+function sendMine() {
+  var inp = $("myInp"); var text = inp.value.trim(); if (!text) return;
+  if (text.length > 1000) { text = text.slice(0, 1000); toast(T("太长啦，已截到 1000 字","Too long — trimmed to 1000 chars")); }
+  /* 防刷：3 秒一条 */
+  var now = Date.now(), last = 0;
+  try { last = +(localStorage.getItem("coco_chat_last") || 0); } catch (e) {}
+  if (now - last < 3000) { toast(T("说得太快啦，歇几秒再发","Slow down a bit")); return; }
+  try { localStorage.setItem("coco_chat_last", String(now)); } catch (e) {}
+  var name = $("myName").value.trim();
+  var okMsg = (name ? name + (LANG==="en" ? ", " : "，") : "") + T("已发送，留言已送达。","Sent — message delivered.");
+  if (!sbReady()) { sendMineLocal(text, name); toast(okMsg); return; }
+  inp.value = "";
+  __sb.from("chat_messages").insert({ vid: visitorId(), vname: name, sender: "visitor", text: text })
+    .then(function (r) {
+      if (r.error) {
+        if (r.error.message && r.error.message.indexOf("rate_limited") >= 0) {
+          inp.value = text; toast(T("服务器限流啦，请几秒后再发","Rate-limited, retry in seconds"));
+        } else { sendMineLocal(text, name); toast(T("已发送（后端同步失败，暂存本地）","Sent (kept locally, sync failed)")); }
+      } else { toast(okMsg); chatPullMine(); }
+    })
+    .catch(function () { sendMineLocal(text, name); toast(T("已发送（后端同步失败，暂存本地）","Sent (kept locally, sync failed)")); });
 }
 
 /* ---- 管理员：线程管理与回复 ---- */
 function renderThreads() {
+  if (__chatAll) { renderThreadsRemote(); return; }
   if (!store.chat.visitors.length) {
     $("threads").innerHTML = '<p class="muted">'+T("暂时还没有访客留言。","No visitor messages yet.")+'</p>';
     return;
@@ -1721,6 +1869,16 @@ function alreadyPublic(vid, mi) {
   return store.chat.publicAnon.some(function(p){ return p.ref===vid && p.mi===mi; });
 }
 function renderBubbles() {
+  if (__snippets) {
+    if (!__snippets.length) {
+      $("bubbles").innerHTML = '<p class="muted">'+T("暂无公开的聊天片段。","No public snippets yet.")+'</p>';
+      return;
+    }
+    $("bubbles").innerHTML = __snippets.map(function(p){
+      return '<div class="bubble"><div class="who">'+T("💬 匿名聊天片段","💬 Anonymous snippet")+'</div><p>'+esc(p.text)+"</p><time>"+fmt(p.time)+"</time></div>";
+    }).join("");
+    return;
+  }
   if (!store.chat.publicAnon.length) {
     $("bubbles").innerHTML = '<p class="muted">'+T("暂无公开的聊天片段。","No public snippets yet.")+'</p>';
     return;
@@ -1826,11 +1984,12 @@ function modalGo() {
 }
 function enterAdmin(){
   am = true; sessionStorage.setItem(LS_SESSION,"1");
-  closeModal(); renderAdminUI(); renderChat(); renderThreads(); renderWorks(); renderMoments(); renderLinks();
+  closeModal(); renderAdminUI(); renderChat(); renderThreads(); renderWorks(); renderMoments(); renderLinks(); chatAdminPull();
   toast(T("管理模式已开启","Admin mode on"));
 }
 function exitAdmin(){
   am = false; sessionStorage.removeItem(LS_SESSION);
+  __chatAll = null;
   renderAdminUI(); renderChat(); renderWorks(); renderMoments(); renderLinks();
   toast(T("已退出管理模式","Admin mode off"));
 }
@@ -1960,9 +2119,30 @@ if ($("dataImportFile")) $("dataImportFile").addEventListener("change", function
 $("fbSend").addEventListener("click", function(){
   var t = $("fbInp").value.trim();
   if (!t) { toast(T("先写点建议再投递","Write a suggestion first")); return; }
-  store.feedback.push({ text: t, time: Date.now() });
-  saveStore(); $("fbInp").value = ""; renderFb();
-  toast(T("已投递，感谢你的建议！","Sent — thanks for your feedback!"));
+  if (t.length > 1000) { t = t.slice(0, 1000); toast(T("太长啦，已截到 1000 字","Too long — trimmed to 1000 chars")); }
+  /* 防刷：同一浏览器 5 秒内只能投一条 */
+  var now = Date.now(), last = 0;
+  try { last = +(localStorage.getItem("coco_fb_last") || 0); } catch (e) {}
+  if (now - last < 5000) { toast(T("投得太快啦，歇几秒再投","Slow down — wait a few seconds")); return; }
+  try { localStorage.setItem("coco_fb_last", String(now)); } catch (e) {}
+  $("fbInp").value = "";
+  var okMsg = T("已投递，感谢你的建议！","Sent — thanks for your feedback!");
+  var fbMsg = T("投递失败，已暂存本地","Sync failed — kept locally");
+  var rlMsg = T("服务器限流啦，请 10 秒后再投","Server rate-limited — retry in 10s");
+  function localSave() { store.feedback.push({ text: t, time: Date.now() }); saveStore(); renderFb(); }
+  if (sbReady()) {
+    __sb.from(SB_TABLE).insert({ text: t }).then(function (r) {
+      if (r.error) {
+        if (r.error.message && r.error.message.indexOf("rate_limited") >= 0) {
+          $("fbInp").value = t; /* 限流：把文字还给用户，稍后可再投 */
+          toast(rlMsg);
+        } else { localSave(); toast(fbMsg); }
+      }
+      else { toast(okMsg); fbPull(); }
+    }).catch(function () { localSave(); toast(fbMsg); });
+  } else {
+    localSave(); toast(okMsg);
+  }
 });
 
 $("ccAdd").addEventListener("click", function(){
@@ -1992,6 +2172,34 @@ document.addEventListener("click", function(e){
 
   var tog = t.closest("[data-toggle]");
   if (tog) { tog.closest(".thread").classList.toggle("open"); return; }
+
+  var rsend = t.closest("[data-rsend]");
+  if (rsend) {
+    var rvid = rsend.getAttribute("data-rsend");
+    var rin = document.querySelector('input[data-rreply="'+rvid+'"]');
+    var rtext = rin ? rin.value.trim() : "";
+    if (!rtext) { toast(T("先写点回复","Write a reply first")); return; }
+    adminInvoke({ action: "chat_reply", vid: rvid, text: rtext }, function () {
+      toast(T("已回复","Replied")); chatAdminPull();
+    });
+    return;
+  }
+
+  var rpub = t.closest("[data-rpub]");
+  if (rpub) {
+    adminInvoke({ action: "chat_publish", id: +rpub.getAttribute("data-rpub") }, function () {
+      toast(T("已匿名公开","Published")); chatAdminPull(); snippetsPull();
+    });
+    return;
+  }
+
+  var rdel = t.closest("[data-rdel]");
+  if (rdel) {
+    adminInvoke({ action: "chat_delete_msg", id: +rdel.getAttribute("data-rdel") }, function () {
+      toast(T("已删除","Deleted")); chatAdminPull();
+    });
+    return;
+  }
 
   var send = t.closest("[data-send]");
   if (send) {
@@ -2050,6 +2258,28 @@ document.addEventListener("click", function(e){
     var mid = dm.getAttribute("data-delmo");
     store.moments = store.moments.filter(function(x){ return x.id!==mid; });
     saveStore(); renderMoments(); toast(T("已删除动态","Moment deleted"));
+    return;
+  }
+
+  var dfbr = t.closest("[data-delfbr]");
+  if (dfbr) {
+    var fid = +dfbr.getAttribute("data-delfbr");
+    var fpass = "";
+    try { fpass = localStorage.getItem(LS_ADMIN) || ""; } catch (e) {}
+    if (!sbReady()) { toast(T("后端未连接","Backend offline")); return; }
+    if (!fpass) { toast(T("未找到管理密码","Admin password missing")); return; }
+    dfbr.disabled = true;
+    __sb.functions.invoke("fb-admin", { body: { action: "delete", id: fid, pass: fpass } })
+      .then(function (r) {
+        if (r.error || (r.data && !r.data.ok)) {
+          toast(T("删除失败，请稍后再试","Delete failed, try later"));
+          dfbr.disabled = false;
+        } else {
+          toast(T("已从后端删除","Deleted from backend"));
+          fbPull();
+        }
+      })
+      .catch(function () { toast(T("删除失败，请稍后再试","Delete failed, try later")); dfbr.disabled = false; });
     return;
   }
 
@@ -2250,7 +2480,7 @@ var STR = {
   optFormal: ["正事", "Formal"],
   addBtn: ["添加", "Add"],
   chatTitle: ["💬 聊聊天", "💬 Leave a Message"],
-  chatNote: ["给我留句话吧。你可以表达疑问、想聊的话题，或者纯粹打个招呼。（第一版原型：数据保存在当前浏览器，真正的“跨设备私聊”需要后端支持。）", "Leave a message — a question, a topic, or just say hi. (Prototype: data stays in this browser; real cross-device chat needs a backend.)"],
+  chatNote: ["给我留句话吧。你可以表达疑问、想聊的话题，或者纯粹打个招呼。（留言会直达我的后端，回复后会出现在这里。）", "Leave a message — a question, a topic, or just say hi. (Messages go straight to my backend; replies show up here.)"],
   myPh: ["写下想说的话…（回车发送）", "Write something… (Enter to send)"],
   nameLbl: ["称呼（可选）：", "Name (optional):"],
   namePh: ["留空则为匿名", "Blank = anonymous"],
@@ -2331,7 +2561,7 @@ var STR = {
   lblIntro: ["自我介绍", "Self-introduction"],
   fbTitle: ["📬 意见箱", "📬 Feedback Box"],
   fbSub: ["Feedback Box · 建议收集", "Feedback Box · Suggestions"],
-  fbNote: ["对这个网站有什么建议或想法？写下来投给我，我会认真看。（第一版原型：反馈保存在当前浏览器。）", "Any suggestions or ideas about this site? Drop them here — I read every one. (Prototype: feedback is stored in this browser.)"],
+  fbNote: ["对这个网站有什么建议或想法？写下来投给我，我会认真看。（反馈会直接投递到我的后端信箱。）", "Any suggestions or ideas about this site? Drop them here — I read every one. (Feedback goes straight to my backend inbox.)"],
   fbPh: ["写下你的建议…", "Write your suggestions…"],
   fbSend: ["📮 投递反馈", "📮 Send feedback"],
   fbAdmin: ["管理员 · 反馈管理", "Admin · Feedback"],
@@ -3628,13 +3858,19 @@ $("fxSave").addEventListener("click", function () {
     dock.classList.toggle("fxd-flip", flip);
     dock.classList.toggle("fxd-edge-l", !flip && x <= 4);
     dock.classList.toggle("fxd-edge-r", flip && x >= window.innerWidth - 60);
-    /* 翻转时球位于容器右端：容器左缘 = 球x - 当前激活面板宽 - 间隙 */
-    var pw = 236, ap = $("fxdPanel");
-    if (window.fxdMode === "bg") ap = $("fxdPanelBg");
-    else if (window.fxdMode === "music") ap = $("fxdPanelMusic");
-    if (ap && !ap.hidden && ap.offsetWidth) pw = ap.offsetWidth;
-    else if (window.innerWidth <= 640) pw = 200;
-    dock.style.left = (flip ? x - pw - 10 : x) + "px";
+    /* 窄屏不翻转：面板始终向右开，并钳制球位保证面板完整可见 */
+    if (window.innerWidth <= 640) {
+      flip = false;
+      x = Math.max(0, Math.min(window.innerWidth - 276, x));
+      dock.classList.remove("fxd-flip");
+      dock.classList.toggle("fxd-edge-l", x <= 4);
+      dock.classList.remove("fxd-edge-r");
+    }
+    /* 面板垂直防溢出：球贴顶（y<90）向下展开；贴底向上展开 */
+    dock.classList.toggle("fxd-pt", y < 90);
+    dock.classList.toggle("fxd-pb", y > window.innerHeight - 160);
+    /* 面板已脱离文档流（绝对定位），容器宽恒为球体 56px：球 x 即容器 x，两种朝向一致 */
+    dock.style.left = x + "px";
     dock.style.top = y + "px";
     dock.style.transform = "none";
   }
@@ -4113,6 +4349,13 @@ renderBgThumbs();
 applyBg();
 if (window.bgSolidApply) window.bgSolidApply();
 route();
+window.addEventListener("load", function () {
+  if (typeof sbReady === "function" && sbReady()) {
+    fbPull(); chatPullMine(); snippetsPull(); chatAdminPull();
+    setInterval(chatPullMine, 15000); /* 盯管理员回复 */
+    setInterval(function () { snippetsPull(); chatAdminPull(); }, 30000);
+  }
+});
 </script>
 </body>
 </html>
