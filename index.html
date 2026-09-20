@@ -888,6 +888,19 @@
     box-shadow: 0 8px 26px rgba(0,0,0,.32), 0 0 14px rgba(139,123,255,.35); }
   body.light #toTop { box-shadow: 0 8px 20px rgba(30,40,60,.16); }
   @media (max-width: 640px) { #toTop { right: 14px; bottom: 14px; width: 42px; height: 42px; font-size: 18px; } }
+/* ===== 快速反馈按钮（左下角 📮，任意页直达意见箱） ===== */
+  #toFb { position: fixed; left: 22px; bottom: 22px; z-index: 40; width: 46px; height: 46px; border-radius: 50%;
+    background: color-mix(in srgb, var(--card) 82%, transparent); border: 1px solid var(--line); color: var(--text);
+    font-size: 19px; line-height: 1; cursor: pointer; font-family: inherit; padding: 0;
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 8px 22px rgba(0,0,0,.28); opacity: .92;
+    transition: transform .3s ease, border-color .2s, box-shadow .2s; }
+  #toFb:hover { border-color: var(--accent); transform: translateY(-3px);
+    box-shadow: 0 8px 26px rgba(0,0,0,.32), 0 0 14px rgba(139,123,255,.35); }
+  body.light #toFb { box-shadow: 0 8px 20px rgba(30,40,60,.16); }
+  @media (max-width: 640px) { #toFb { left: 14px; bottom: 14px; width: 42px; height: 42px; font-size: 17px; } }
+  .fb-flash { animation: fbFlash 1.1s ease; }
+  @keyframes fbFlash { 0%, 100% { box-shadow: none; } 30% { box-shadow: 0 0 0 3px rgba(139,123,255,.55); } }
 /* ===== 成果 · 技术亮点卡（feat 类型条目；mono 档案签代替图标，零 emoji） ===== */
   .file .feat-ic { display: grid; place-items: center; height: 84px; background: #14171d;
     font-family: Consolas, "Courier New", monospace; font-size: 15px; letter-spacing: 3px; color: var(--accent-2); }
@@ -972,6 +985,7 @@
 </div>
   <div id="neonCursor" aria-hidden="true"></div>
 <button id="toTop" type="button" data-i18n-title="toTop" title="回到顶端" aria-label="回到顶端">↑</button>
+<button id="toFb" type="button" data-i18n-title="toFb" title="去意见箱" aria-label="去意见箱">📮</button>
 
 <nav>
   <div class="nav-in">
@@ -2762,6 +2776,7 @@ var STR = {
   repoNotePh: ["备注（可选），如：专业课课件下载", "Note (optional), e.g. course slides"],
   repoAdd: ["添加网址", "Add link"],
   toTop: ["回到顶端", "Back to top"],
+  toFb: ["去意见箱", "Go to feedback"],
   adminTexts: ["管理员 · 默认文本", "ADMIN · Default texts"],
   textsHint: ["改全站写死的提示语 / 占位符 / 按钮字（中英各一份）。留空 = 恢复默认；改动随数据备份一起走。", "Edit the site's built-in labels, placeholders and button texts (CN + EN). Leave a field empty to use the default; changes travel with data backups."],
   adminTrash: ["管理员 · 回收站", "ADMIN · Trash"],
@@ -4241,6 +4256,23 @@ $("fxSave").addEventListener("click", function () {
   window.addEventListener("scroll", chk, { passive: true });
   chk();
   b.addEventListener("click", function () { window.scrollTo({ top: 0, behavior: "smooth" }); });
+})();
+
+/* ===== 快速反馈（📮 任意页一键直达主页 SEC.07 意见箱） ===== */
+(function () {
+  var b = $("toFb");
+  if (!b) return;
+  b.addEventListener("click", function () {
+    navTo("home");
+    setTimeout(function () {
+      var fb = $("secFeedback");
+      if (!fb) return;
+      fb.scrollIntoView({ behavior: "smooth", block: "start" });
+      fb.classList.remove("fb-flash");
+      void fb.offsetWidth;   /* 强制重排以重触发闪烁动画 */
+      fb.classList.add("fb-flash");
+    }, 80);
+  });
 })();
 /* 成果亮点卡「看看」跳转（动态渲染，走委托） */
 document.addEventListener("click", function (e) {
