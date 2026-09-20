@@ -818,6 +818,40 @@
   #fxDock.fxd-pt:hover .fxd-panel, #fxDock.fxd-pt.open .fxd-panel { transform: translateY(0) translateX(0); }
   #fxDock.fxd-pb .fxd-panel { top: auto; bottom: -6px; transform: translateY(0) translateX(-18px); }
   #fxDock.fxd-pb:hover .fxd-panel, #fxDock.fxd-pb.open .fxd-panel { transform: translateY(0) translateX(0); }
+
+/* ===== 悬浮球荧光圈（2026-09-17，提升第一眼可见性；粒子面板可关，键 coco_fxd_halo） =====
+   沿用徽章流星语言：@property 角度旋转 conic 亮环 + mask 描边 + 紫/蓝辉光脉冲。 */
+  .fxd-ball::after {
+    content: ""; position: absolute; inset: -4px; border-radius: 50%; padding: 2.5px;
+    background: conic-gradient(from var(--mb-angle),
+      transparent 0deg, transparent 250deg,
+      var(--accent) 300deg, #ffffff 330deg, var(--accent-2) 352deg, transparent 360deg);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+            mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            mask-composite: exclude;
+    filter: drop-shadow(0 0 4px color-mix(in srgb, var(--accent) 70%, transparent));
+    animation: mbSpin 3.6s linear infinite;
+    pointer-events: none;
+    opacity: 0; transition: opacity .3s ease;
+  }
+  #fxDock.halo .fxd-ball::after { opacity: .95; }
+  #fxDock.halo .fxd-ball { animation: fxdHalo 2.8s ease-in-out infinite; }
+  @keyframes fxdHalo {
+    0%, 100% { box-shadow: 0 0 10px 2px rgba(139,123,255,.45), 0 0 26px 6px rgba(90,208,255,.18), 4px 6px 18px rgba(0,0,0,.25); }
+    50%      { box-shadow: 0 0 18px 4px rgba(139,123,255,.70), 0 0 42px 11px rgba(90,208,255,.30), 4px 6px 18px rgba(0,0,0,.25); }
+  }
+  body.light .fxd-ball::after {
+    background: conic-gradient(from var(--mb-angle),
+      transparent 0deg, transparent 250deg,
+      #5a4bd6 300deg, #8b7bff 330deg, #2f8fd0 352deg, transparent 360deg);
+    filter: drop-shadow(0 0 3px rgba(90,75,214,.5));
+  }
+  body.light #fxDock.halo .fxd-ball { animation: fxdHaloL 2.8s ease-in-out infinite; }
+  @keyframes fxdHaloL {
+    0%, 100% { box-shadow: 0 0 8px 1px rgba(90,75,214,.28), 0 0 20px 5px rgba(90,75,214,.10), 3px 5px 14px rgba(30,40,60,.14); }
+    50%      { box-shadow: 0 0 15px 3px rgba(90,75,214,.45), 0 0 34px 9px rgba(90,75,214,.18), 3px 5px 14px rgba(30,40,60,.14); }
+  }
 /* ===== 手机端适配补充 ===== */
   @media (max-width: 560px) {
     .nav-in { flex-wrap: wrap; row-gap: 4px; padding: 10px 14px; }
@@ -829,6 +863,38 @@
   @media (max-width: 380px) {
     .nav-search input[type=text] { width: 76px; }
   }
+/* ===== 默认文本管理面板 ===== */
+  .tx-row { display: grid; grid-template-columns: 160px 1fr 1fr auto; gap: 8px; align-items: center; padding: 9px 0; border-bottom: 1px dashed var(--line); }
+  .tx-row:last-child { border-bottom: none; }
+  .tx-name { font-size: 12px; color: var(--muted); line-height: 1.4; }
+  .tx-name b { display: block; color: var(--text); font-size: 13px; font-weight: 600; }
+  .tx-row input { width: 100%; background: var(--card-2); border: 1px solid var(--line); border-radius: 9px; color: var(--text); padding: 7px 10px; font-size: 13px; outline: none; font-family: inherit; }
+  .tx-row input:focus { border-color: var(--accent); }
+  .tx-acts { display: flex; gap: 6px; }
+  @media (max-width: 640px) {
+    .tx-row { grid-template-columns: 1fr 1fr; }
+    .tx-name, .tx-acts { grid-column: 1 / -1; }
+  }
+/* ===== 回到顶端按钮（下滑 >600px 浮现；风格：档案系圆形暗底 + 细边） ===== */
+  #toTop { position: fixed; right: 22px; bottom: 22px; z-index: 40; width: 46px; height: 46px; border-radius: 50%;
+    background: color-mix(in srgb, var(--card) 82%, transparent); border: 1px solid var(--line); color: var(--text);
+    font-size: 20px; line-height: 1; cursor: pointer; font-family: inherit; padding: 0;
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 8px 22px rgba(0,0,0,.28);
+    opacity: 0; transform: translateY(14px); pointer-events: none;
+    transition: opacity .3s ease, transform .3s ease, border-color .2s, box-shadow .2s; }
+  #toTop.show { opacity: .92; transform: translateY(0); pointer-events: auto; }
+  #toTop:hover { border-color: var(--accent); color: var(--accent-2);
+    box-shadow: 0 8px 26px rgba(0,0,0,.32), 0 0 14px rgba(139,123,255,.35); }
+  body.light #toTop { box-shadow: 0 8px 20px rgba(30,40,60,.16); }
+  @media (max-width: 640px) { #toTop { right: 14px; bottom: 14px; width: 42px; height: 42px; font-size: 18px; } }
+/* ===== 成果 · 技术亮点卡（feat 类型条目；mono 档案签代替图标，零 emoji） ===== */
+  .file .feat-ic { display: grid; place-items: center; height: 84px; background: #14171d;
+    font-family: Consolas, "Courier New", monospace; font-size: 15px; letter-spacing: 3px; color: var(--accent-2); }
+  body.light .file .feat-ic { background: #eceff5; color: #5a4bd6; }
+  .file .feat-desc { margin-top: 4px; font-size: 12px; line-height: 1.65; color: var(--muted); white-space: normal; }
+  .file .feat-go { color: var(--accent-2); cursor: pointer; }
+  .file .feat-go:hover { text-decoration: underline; }
 </style>
 </head>
 <body>
@@ -879,6 +945,7 @@
     <div class="fxd-title mono">粒子天气 · FX</div>
     <div class="fxd-status" id="fxdStatus">当前：自动待机</div>
     <label class="fxd-auto"><input type="checkbox" id="fxdAuto"> 自动粒子（刷新时按概率出现）</label>
+    <label class="fxd-auto"><input type="checkbox" id="fxdHalo" checked> 荧光圈提示</label>
     <div class="fxd-grid" id="fxdGrid"></div>
     <button class="fxd-stop" id="fxdStop">停止当前效果</button>
   </div>
@@ -904,6 +971,7 @@
   </div>
 </div>
   <div id="neonCursor" aria-hidden="true"></div>
+<button id="toTop" type="button" data-i18n-title="toTop" title="回到顶端" aria-label="回到顶端">↑</button>
 
 <nav>
   <div class="nav-in">
@@ -1067,6 +1135,18 @@
           </div>
           <p class="note" id="dataState" style="margin-top:4px"></p>
         </div>
+      </div>      <div class="admin-panel" id="textsPanel">
+        <div class="admin-tag" data-i18n="adminTexts">管理员 · 默认文本</div>
+        <div class="formgrid" style="margin-top:12px">
+          <p class="note" data-i18n="textsHint">改全站写死的提示语 / 占位符 / 按钮字（中英各一份）。留空 = 恢复默认；改动随数据备份一起走。</p>
+          <div id="textsList"></div>
+        </div>
+      </div>      <div class="admin-panel" id="trashPanel">
+        <div class="admin-tag" data-i18n="adminTrash">管理员 · 回收站</div>
+        <div class="formgrid" style="margin-top:12px">
+          <p class="note" data-i18n="trashHint">删除成果 / 链接 / 动态前会再次确认；删掉的内容在这里保留最近 5 条，可随时「复原」。</p>
+          <div id="trashList"></div>
+        </div>
       </div>    </div>
 
     <div class="home-grid">
@@ -1203,7 +1283,14 @@
       <p class="note" style="margin-bottom:12px" data-i18n="fbNote">对这个网站有什么建议或想法？写下来投给我，我会认真看。（反馈会直接投递到我的后端信箱。）</p>
       <div class="formgrid">
         <textarea id="fbInp" rows="3" data-i18n-ph="fbPh" placeholder="写下你的建议…"></textarea>
-        <div style="display:flex;gap:10px">
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <select id="fbDevice" title="你正在使用的设备类型"
+            style="background:var(--card-2);border:1px solid var(--line);border-radius:10px;color:var(--text);padding:9px 12px;font-size:14px;font-family:inherit">
+            <option value="手机" data-i18n="fbDevMobile">手机</option>
+            <option value="电脑" data-i18n="fbDevDesktop">电脑</option>
+            <option value="平板" data-i18n="fbDevTablet">平板</option>
+            <option value="其他" data-i18n="fbDevOther">其他</option>
+          </select>
           <button class="btn" id="fbSend" data-i18n="fbSend">投递反馈</button>
         </div>
       </div>
@@ -1451,7 +1538,9 @@ function defaultStore() {
     links: [],
     motto: { main: "", sub: "" },
     qa: [],
-    fx: { prob: 0.35, density: 1, glow: 1, enabled: true }
+    fx: { prob: 0.35, density: 1, glow: 1, enabled: true },
+    texts: {},         /* 默认文本自定义覆盖 {i18n键:[中,英]}，只存改过的键 */
+    trash: []          /* 回收站：成果/链接/动态删除后可复原（最多 5 条，FIFO） */
   };
 }
 
@@ -1507,6 +1596,44 @@ function saveStore() {
 
 /* 载入用户数据。此处不做任何「强制改回默认值」的操作 —— 那正是以前版本更新会重置调整的原因 */
 var store = loadStore();
+/* 一次性注入：站点技术亮点成果卡（管理员可删，删后不复活；随备份/导出一起走） */
+(function () {
+  if (store.worksSeedV2) return;
+  store.worksSeedV2 = 1;
+  var now = Date.now();
+  [
+    { id: "feat-dock", feat: true, tag: "DOCK", name: "悬浮球分身 Dock",
+      desc: "一球三用：粒子天气 / 背景切换 / 音乐播放三模合一。自由拖动、贴边半隐、位置记忆；纯 CSS「悬停桥」保住鼠标通路；荧光环 + 辉光脉冲沿用徽章流星同款 conic 工艺。",
+      go: "home", time: now },
+    { id: "feat-api", feat: true, tag: "API", name: "Supabase 轻后端",
+      desc: "意见箱与聊聊天上云：Postgres 行级安全（访客只能看到自己的线程）、限流触发器防刷、Edge Function 密码闸门（零导入 fetch 直连 REST 版）；断网或未配置时自动降级本地存储。",
+      go: "contact", time: now },
+    { id: "feat-i18n", feat: true, tag: "I18N", name: "双语文本系统",
+      desc: "全站中英一键切换；i18n 字典 + 管理员「默认文本」覆盖层——提示语、占位符、按钮字都能在线修改，留空即回退默认，改动随数据备份一起走。",
+      go: "home", time: now }
+  ].forEach(function (x) {
+    if (!store.works.results.some(function (f) { return f.id === x.id; })) store.works.results.push(x);
+  });
+  saveStore();
+})();
+/* 一次性注入：常用链接进仓库（公开；按 URL 去重；管理员可删，删后不复活） */
+(function () {
+  if (store.linksSeedV1) return;
+  store.linksSeedV1 = 1;
+  var seeds = [
+    { url: "https://codexradar.com/", note: "AI 跑分 / 模型对比" },
+    { url: "https://examcrafts.com/", note: "英语学习平台（四六级 / 专四专八 / 考研）" },
+    { url: "https://hero-sms.com/cn", note: "虚拟手机号（接码用）" },
+    { url: "https://github.com/DRderder-dudulu", note: "我的 GitHub" },
+    { url: "https://supabase.com/", note: "本站的后端服务（数据库 + 函数）" }
+  ];
+  var now = Date.now();
+  seeds.forEach(function (x) {
+    var dup = store.links.some(function (l) { return l.url === x.url; });
+    if (!dup) store.links.push({ id: uid(), url: x.url, note: x.note, time: now, pub: true });
+  });
+  saveStore();
+})();
 var am = sessionStorage.getItem(LS_SESSION) === "1";
 var curPage = "home";
 var worksTab = "tt";
@@ -1587,6 +1714,8 @@ function render() {
   renderHomePreviews();
   renderBadgeList();
   renderAdminUI();
+  renderTextsPanel();
+  renderTrashPanel();
 }
 
 /* ---- 意见箱 · Supabase 后端（可选，未配置时自动降级本地） ----
@@ -1606,28 +1735,33 @@ function sbReady() {
 }
 function fbPull() {
   if (!sbReady()) return;
-  __sb.from(SB_TABLE).select("id,text,created_at").order("created_at", { ascending: false }).limit(300)
+  __sb.from(SB_TABLE).select("id,text,device,created_at").order("created_at", { ascending: false }).limit(300)
     .then(function (r) {
       if (r.error) { console.warn("fb pull:", r.error.message); return; }
-      __fbRemote = (r.data || []).map(function (x) { return { id: x.id, text: x.text, time: Date.parse(x.created_at) || Date.now() }; });
+      __fbRemote = (r.data || []).map(function (x) { return { id: x.id, text: x.text, device: x.device || "", time: Date.parse(x.created_at) || Date.now() }; });
       renderFb();
     }).catch(function (e) { console.warn("fb pull failed:", e); });
 }
 
 /* ---- 意见箱 ---- */
 function renderFb() {
-  var remote = __fbRemote && __fbRemote.length;
-  var list = remote ? __fbRemote : store.feedback;
-  if (!list.length) {
+  /* 远端与本地降级期条目合并渲染：本地条目带「本地」标记，避免被远端列表遮蔽 */
+  var rows = [];
+  if (__fbRemote) __fbRemote.forEach(function (f) { rows.push({ f: f, remote: true }); });
+  store.feedback.forEach(function (f, i) { rows.push({ f: f, i: i, remote: false }); });
+  rows.sort(function (a, b) { return (b.f.time || 0) - (a.f.time || 0); });
+  if (!rows.length) {
     $("fbList").innerHTML = '<p class="muted">'+T("暂时还没有反馈。","No feedback yet.")+'</p>';
     return;
   }
-  $("fbList").innerHTML = list.map(function(f,i){ return { f:f, i:i }; }).reverse().map(function(x){
+  $("fbList").innerHTML = rows.map(function (x) {
     var delBtn = "";
-    if (!remote) delBtn = '<button class="btn sm ghost" data-delfb="'+x.i+'" style="color:var(--danger)">'+T("删除","Delete")+'</button>';
+    if (!x.remote) delBtn = '<button class="btn sm ghost" data-delfb="'+x.i+'" style="color:var(--danger)">'+T("删除","Delete")+'</button>';
     else if (am) delBtn = '<button class="btn sm ghost" data-delfbr="'+x.f.id+'" style="color:var(--danger)">'+T("删除","Delete")+'</button>';
+    var devTag = x.f.device ? ' · ' + esc(x.f.device) : '';
+    var locTag = x.remote ? '' : ' · ' + T("本地", "local");
     return '<div class="tmsg visitor"><div class="txt">'+esc(x.f.text).replace(/\n/g,"<br>")+
-      '<div class="muted" style="font-size:11px">'+fmt(x.f.time)+'</div></div>'+delBtn+'</div>';
+      '<div class="muted" style="font-size:11px">'+fmt(x.f.time)+devTag+locTag+'</div></div>'+delBtn+'</div>';
   }).join("");
 }
 
@@ -1751,7 +1885,16 @@ function adminInvoke(body, onOk, quiet) {
   if (!pass) { if (!quiet) toast(T("未找到管理密码","Admin password missing")); return; }
   body.pass = pass;
   __sb.functions.invoke("fb-admin", { body: body }).then(function (r) {
-    if (r.error || (r.data && !r.data.ok)) { if (!quiet) toast(T("操作失败，请稍后再试","Failed, try later")); return; }
+    if (r.error || (r.data && !r.data.ok)) {
+      var st = 0;
+      try { st = (r.error && r.error.context && r.error.context.status) || 0; } catch (e) {}
+      if (!quiet) {
+        if (st === 401 || (r.data && r.data.error === "unauthorized"))
+          toast(T("后端密钥与本地管理密码不一致，函数操作被拒绝","Backend secret mismatch — function rejected"));
+        else toast(T("操作失败，请稍后再试","Failed, try later"));
+      }
+      return;
+    }
     if (onOk) onOk(r.data || {});
   }).catch(function () { if (!quiet) toast(T("操作失败，请稍后再试","Failed, try later")); });
 }
@@ -1899,6 +2042,15 @@ function renderWorks() {
     return;
   }
   $("fileGrid").innerHTML = list.map(function(f){
+    if (f.feat) {
+      var fdel = am ? '<button class="del" data-delf="'+esc(f.id)+'">'+T("删除","Delete")+'</button>' : "";
+      var fgo = f.go ? '<a class="feat-go" data-featgo="'+esc(f.go)+'">'+T("看看 →","See it →")+'</a>' : "";
+      return '<div class="file feat"><div class="feat-ic">'+esc(f.tag||"FEAT")+'</div>'+
+        '<div class="meta"><div class="name">'+esc(f.name)+'</div>'+
+        '<div class="feat-desc">'+esc(f.desc)+'</div>'+
+        '<div class="sub">'+fmt(f.time)+"</div></div>"+
+        '<div class="file-actions">'+fgo+fdel+"</div></div>";
+    }
     var kind = fileKind(f.mime);
     var thumb = "";
     if (kind==="image") thumb = '<img class="thumb" src="'+f.dataURL+'" alt="'+esc(f.name)+'">';
@@ -2116,6 +2268,16 @@ if ($("dataImportFile")) $("dataImportFile").addEventListener("change", function
   r.readAsText(f, "utf-8");
 });
 
+/* 设备类型：按 UA 预选，访客可改 */
+(function () {
+  var ua = navigator.userAgent || "";
+  var dev = "电脑";
+  if (/iPad|Tablet|PlayBook|Silk/i.test(ua) || (/Android/i.test(ua) && !/Mobi/i.test(ua))) dev = "平板";
+  else if (/Mobi|iPhone|iPod|Android|HarmonyOS|MicroMessenger/i.test(ua)) dev = "手机";
+  var sel = $("fbDevice");
+  if (sel) for (var i = 0; i < sel.options.length; i++) if (sel.options[i].value === dev) { sel.selectedIndex = i; break; }
+})();
+
 $("fbSend").addEventListener("click", function(){
   var t = $("fbInp").value.trim();
   if (!t) { toast(T("先写点建议再投递","Write a suggestion first")); return; }
@@ -2129,9 +2291,10 @@ $("fbSend").addEventListener("click", function(){
   var okMsg = T("已投递，感谢你的建议！","Sent — thanks for your feedback!");
   var fbMsg = T("投递失败，已暂存本地","Sync failed — kept locally");
   var rlMsg = T("服务器限流啦，请 10 秒后再投","Server rate-limited — retry in 10s");
-  function localSave() { store.feedback.push({ text: t, time: Date.now() }); saveStore(); renderFb(); }
+  var dev = ($("fbDevice") && $("fbDevice").value) || "";
+  function localSave() { store.feedback.push({ text: t, device: dev, time: Date.now() }); saveStore(); renderFb(); }
   if (sbReady()) {
-    __sb.from(SB_TABLE).insert({ text: t }).then(function (r) {
+    __sb.from(SB_TABLE).insert({ text: t, device: dev }).then(function (r) {
       if (r.error) {
         if (r.error.message && r.error.message.indexOf("rate_limited") >= 0) {
           $("fbInp").value = t; /* 限流：把文字还给用户，稍后可再投 */
@@ -2236,8 +2399,15 @@ document.addEventListener("click", function(e){
   var df = t.closest("[data-delf]");
   if (df) {
     var fid = df.getAttribute("data-delf");
+    var witem = store.works[worksTab].find(function(x){ return x.id===fid; });
+    if (!witem) return;
+    if (!confirm(T("确定删除「" + (witem.name || "") + "」吗？删掉后可以在回收站复原。",
+                   "Delete this item? You can restore it from Trash."))) return;
+    var wkept = trashPush(worksTab === "tt" ? "work_tt" : "work", witem);
     store.works[worksTab] = store.works[worksTab].filter(function(x){ return x.id!==fid; });
-    saveStore(); renderWorks(); toast(T("已删除文件","File deleted"));
+    saveStore(); renderWorks(); renderTrashPanel(); renderHomePreviews();
+    toast(wkept ? T("已删除，可在回收站复原","Deleted — restorable from Trash")
+                : T("已删除（文件过大，未入回收站）","Deleted (too large for Trash)"));
     return;
   }
 
@@ -2256,8 +2426,14 @@ document.addEventListener("click", function(e){
   var dm = t.closest("[data-delmo]");
   if (dm) {
     var mid = dm.getAttribute("data-delmo");
+    var mitem = store.moments.find(function(x){ return x.id===mid; });
+    if (!mitem) return;
+    if (!confirm(T("确定删除这条动态吗？删掉后可以在回收站复原。",
+                   "Delete this moment? You can restore it from Trash."))) return;
+    trashPush("moment", mitem);
     store.moments = store.moments.filter(function(x){ return x.id!==mid; });
-    saveStore(); renderMoments(); toast(T("已删除动态","Moment deleted"));
+    saveStore(); renderMoments(); renderTrashPanel(); renderHomePreviews();
+    toast(T("已删除，可在回收站复原","Deleted — restorable from Trash"));
     return;
   }
 
@@ -2303,8 +2479,15 @@ document.addEventListener("click", function(e){
 
   var dl = t.closest("[data-dellink]");
   if (dl) {
-    store.links.splice(+dl.getAttribute("data-dellink"), 1);
-    saveStore(); renderLinks(); toast(T("已删除网址","Link deleted"));
+    var li = +dl.getAttribute("data-dellink");
+    var litem = store.links[li];
+    if (!litem) return;
+    if (!confirm(T("确定删除「" + (litem.note || litem.url || "") + "」吗？删掉后可以在回收站复原。",
+                   "Delete this link? You can restore it from Trash."))) return;
+    trashPush("link", litem);
+    store.links.splice(li, 1);
+    saveStore(); renderLinks(); renderTrashPanel(); renderHomePreviews();
+    toast(T("已删除，可在回收站复原","Deleted — restorable from Trash"));
     return;
   }
 });
@@ -2563,6 +2746,10 @@ var STR = {
   fbSub: ["Feedback Box · 建议收集", "Feedback Box · Suggestions"],
   fbNote: ["对这个网站有什么建议或想法？写下来投给我，我会认真看。（反馈会直接投递到我的后端信箱。）", "Any suggestions or ideas about this site? Drop them here — I read every one. (Feedback goes straight to my backend inbox.)"],
   fbPh: ["写下你的建议…", "Write your suggestions…"],
+  fbDevMobile: ["手机", "Phone"],
+  fbDevDesktop: ["电脑", "Desktop"],
+  fbDevTablet: ["平板", "Tablet"],
+  fbDevOther: ["其他", "Other"],
   fbSend: ["📮 投递反馈", "📮 Send feedback"],
   fbAdmin: ["管理员 · 反馈管理", "Admin · Feedback"],
   worksTitle: ["🏆 我的成果", "🏆 Works"],
@@ -2573,7 +2760,12 @@ var STR = {
   repoAdmin: ["管理员 · 添加网址", "ADMIN · Add a link"],
   repoUrlPh: ["网址，如：https://example.com/file.zip", "URL, e.g. https://example.com/file.zip"],
   repoNotePh: ["备注（可选），如：专业课课件下载", "Note (optional), e.g. course slides"],
-  repoAdd: ["添加网址", "Add link"]
+  repoAdd: ["添加网址", "Add link"],
+  toTop: ["回到顶端", "Back to top"],
+  adminTexts: ["管理员 · 默认文本", "ADMIN · Default texts"],
+  textsHint: ["改全站写死的提示语 / 占位符 / 按钮字（中英各一份）。留空 = 恢复默认；改动随数据备份一起走。", "Edit the site's built-in labels, placeholders and button texts (CN + EN). Leave a field empty to use the default; changes travel with data backups."],
+  adminTrash: ["管理员 · 回收站", "ADMIN · Trash"],
+  trashHint: ["删除成果 / 链接 / 动态前会再次确认；删掉的内容在这里保留最近 5 条，可随时「复原」。", "Deletions of works / links / moments ask for confirmation first; the last 5 deleted items are kept here and can be restored anytime."]
 };
 
 /* 默认资料内容的英文对照（用户改过的自定义内容保持原文） */
@@ -2604,24 +2796,138 @@ var DATA_EN = {
 };
 function trData(s){ return (LANG === "en" && DATA_EN[s]) ? DATA_EN[s] : s; }
 
+/* 文本覆盖解析：管理员自定义优先，该语言留空则回退 STR 默认 */
+function TK(k, en) {
+  var ov = (store.texts || {})[k];
+  if (ov && ov[en ? 1 : 0]) return ov[en ? 1 : 0];
+  return STR[k] ? STR[k][en ? 1 : 0] : "";
+}
 function applyLang(){
   var en = LANG === "en";
   document.documentElement.lang = en ? "en" : "zh-CN";
   document.title = T("CoCo · 个人主页", "CoCo · Homepage");
   document.querySelectorAll("[data-i18n]").forEach(function(el){
-    var k = el.getAttribute("data-i18n"); if (STR[k]) el.textContent = STR[k][en ? 1 : 0];
+    var k = el.getAttribute("data-i18n"); if (STR[k]) el.textContent = TK(k, en);
   });
   document.querySelectorAll("[data-i18n-ph]").forEach(function(el){
-    var k = el.getAttribute("data-i18n-ph"); if (STR[k]) el.placeholder = STR[k][en ? 1 : 0];
+    var k = el.getAttribute("data-i18n-ph"); if (STR[k]) el.placeholder = TK(k, en);
   });
   document.querySelectorAll("[data-i18n-html]").forEach(function(el){
-    var k = el.getAttribute("data-i18n-html"); if (STR[k]) el.innerHTML = STR[k][en ? 1 : 0];
+    var k = el.getAttribute("data-i18n-html"); if (STR[k]) el.innerHTML = TK(k, en);
   });
   document.querySelectorAll("[data-i18n-title]").forEach(function(el){
-    var k = el.getAttribute("data-i18n-title"); if (STR[k]) el.title = STR[k][en ? 1 : 0];
+    var k = el.getAttribute("data-i18n-title"); if (STR[k]) el.title = TK(k, en);
   });
   $("langBtn").textContent = en ? "中" : "EN";
 }
+
+/* ===== 默认文本管理（管理员） ===== */
+var TEXT_KEYS = [
+  ["searchPh", "搜索框占位"],
+  ["loading", "加载提示"],
+  ["fbNote", "意见箱说明"],
+  ["fbPh", "意见箱占位符"],
+  ["fbSend", "投递按钮文字"],
+  ["myPh", "聊天输入占位"],
+  ["nameLbl", "聊天称呼标签"],
+  ["namePh", "聊天称呼占位"],
+  ["dvPh", "数字分身占位"],
+  ["repoSub", "仓库副标题"],
+  ["repoUrlPh", "仓库网址占位"],
+  ["repoNotePh", "仓库备注占位"]
+];
+function renderTextsPanel() {
+  var box = $("textsList");
+  if (!box) return;
+  box.innerHTML = TEXT_KEYS.filter(function (p) { return !!STR[p[0]]; }).map(function (p) {
+    var k = p[0];
+    var ov = (store.texts || {})[k] || ["", ""];
+    var dot = (ov[0] || ov[1]) ? ' <span style="color:var(--accent)">●</span>' : "";
+    return '<div class="tx-row">' +
+      '<div class="tx-name"><b>' + esc(p[1]) + dot + '</b><span>' + k + '</span></div>' +
+      '<input data-txcn="' + k + '" placeholder="' + esc(STR[k][0]) + '" value="' + esc(ov[0]) + '">' +
+      '<input data-txen="' + k + '" placeholder="' + esc(STR[k][1]) + '" value="' + esc(ov[1]) + '">' +
+      '<div class="tx-acts">' +
+        '<button class="btn sm" data-txsave="' + k + '">' + T("存", "Save") + '</button>' +
+        '<button class="btn sm ghost" data-txreset="' + k + '">' + T("默认", "Reset") + '</button>' +
+      '</div></div>';
+  }).join("");
+}
+document.addEventListener("click", function (e) {
+  var sv = e.target.closest("[data-txsave]");
+  if (sv) {
+    var k = sv.getAttribute("data-txsave");
+    var cnEl = document.querySelector('[data-txcn="' + k + '"]');
+    var enEl = document.querySelector('[data-txen="' + k + '"]');
+    var cn = cnEl ? cnEl.value.trim() : "";
+    var en = enEl ? enEl.value.trim() : "";
+    if (!store.texts) store.texts = {};
+    if (!cn && !en) delete store.texts[k];
+    else store.texts[k] = [cn, en];
+    saveStore(); applyLang(); renderTextsPanel();
+    toast(T("文本已保存", "Text saved"));
+    return;
+  }
+  var rs = e.target.closest("[data-txreset]");
+  if (rs) {
+    var k2 = rs.getAttribute("data-txreset");
+    if (store.texts) delete store.texts[k2];
+    saveStore(); applyLang(); renderTextsPanel();
+    toast(T("已恢复默认", "Back to default"));
+  }
+});
+
+/* ===== 回收站：删除前确认 + 可复原（成果/链接/动态） ===== */
+function trashPush(kind, item) {
+  if (!store.trash) store.trash = [];
+  var raw = "";
+  try { raw = JSON.stringify(item); } catch (e) { raw = ""; }
+  if (raw.length > 800000) return false;   /* 过大（如大文件 dataURL）不进回收站，防撑爆本地存储 */
+  store.trash.push({ id: uid(), kind: kind, item: item, time: Date.now() });
+  while (store.trash.length > 5) store.trash.shift();
+  return true;
+}
+function trashRestore(tid) {
+  var arr = store.trash || [];
+  var idx = -1;
+  for (var i = 0; i < arr.length; i++) if (arr[i].id === tid) { idx = i; break; }
+  if (idx < 0) return;
+  var t = arr[idx];
+  if (t.kind === "work") store.works.results.push(t.item);
+  else if (t.kind === "work_tt") store.works.tt.push(t.item);
+  else if (t.kind === "link") store.links.push(t.item);
+  else if (t.kind === "moment") store.moments.push(t.item);
+  arr.splice(idx, 1);
+  saveStore(); renderWorks(); renderLinks(); renderMoments(); renderTrashPanel(); renderHomePreviews();
+  toast(T("已复原", "Restored"));
+}
+function renderTrashPanel() {
+  var box = $("trashList");
+  if (!box) return;
+  var arr = store.trash || [];
+  if (!arr.length) { box.innerHTML = '<p class="muted">' + T("回收站是空的。", "Trash is empty.") + '</p>'; return; }
+  var KN = { work: T("成果", "Work"), work_tt: T("小东西", "Trifle"), link: T("链接", "Link"), moment: T("动态", "Moment") };
+  box.innerHTML = arr.slice().reverse().map(function (x) {
+    var name = x.kind === "moment" ? (x.item.text || "").slice(0, 40) : (x.item.name || x.item.note || x.item.url || "");
+    return '<div class="pv-row"><span class="pv-k">[' + KN[x.kind] + '] ' + esc(name) + '</span>' +
+      '<span style="display:flex;gap:6px;flex-shrink:0">' +
+      '<button class="btn sm" data-tres="' + x.id + '">' + T("复原", "Restore") + '</button>' +
+      '<button class="btn sm ghost" data-tpurge="' + x.id + '" style="color:var(--danger)">' + T("彻底删", "Purge") + '</button>' +
+      '</span></div>';
+  }).join("");
+}
+document.addEventListener("click", function (e) {
+  var tr = e.target.closest("[data-tres]");
+  if (tr) { trashRestore(tr.getAttribute("data-tres")); return; }
+  var tp = e.target.closest("[data-tpurge]");
+  if (tp) {
+    if (!confirm(T("彻底删除将无法复原，确定吗？", "Purge forever — this cannot be undone. Sure?"))) return;
+    var pid = tp.getAttribute("data-tpurge");
+    store.trash = (store.trash || []).filter(function (x) { return x.id !== pid; });
+    saveStore(); renderTrashPanel();
+    toast(T("已彻底删除", "Purged"));
+  }
+});
 function applyTheme(){
   document.body.classList.toggle("light", THEME === "light");
   $("themeBtn").textContent = THEME === "light" ? "🌙" : "☀️";
@@ -3829,6 +4135,17 @@ $("fxSave").addEventListener("click", function () {
     else { localStorage.setItem("coco_fx_off", "1"); if (window.FX) window.FX.stop(); }
   });
   $("fxdStop").addEventListener("click", function () { if (window.FX) window.FX.stop(); });
+  /* 荧光圈开关（访客可见；选择记忆在本机，默认开） */
+  var haloCk = $("fxdHalo"), haloDock = $("fxDock");
+  if (haloCk && haloDock) {
+    haloCk.checked = localStorage.getItem("coco_fxd_halo") !== "0";
+    haloDock.classList.toggle("halo", haloCk.checked);
+    haloCk.addEventListener("change", function () {
+      if (haloCk.checked) localStorage.removeItem("coco_fxd_halo");
+      else localStorage.setItem("coco_fxd_halo", "0");
+      haloDock.classList.toggle("halo", haloCk.checked);
+    });
+  }
   $("fxdBall").addEventListener("click", function () {
     if ($("fxdBall").getAttribute("data-dragged") === "1") { $("fxdBall").removeAttribute("data-dragged"); return; }
     $("fxDock").classList.toggle("open");
@@ -3911,6 +4228,25 @@ $("fxSave").addEventListener("click", function () {
     } catch (e) {}
   });
 })();
+
+/* ===== 回到顶端（下滑 >600px 出现，全页面生效） ===== */
+(function () {
+  var b = $("toTop");
+  if (!b) return;
+  var on = false;
+  function chk() {
+    var s = (window.scrollY || document.documentElement.scrollTop || 0) > 600;
+    if (s !== on) { on = s; b.classList.toggle("show", on); }
+  }
+  window.addEventListener("scroll", chk, { passive: true });
+  chk();
+  b.addEventListener("click", function () { window.scrollTo({ top: 0, behavior: "smooth" }); });
+})();
+/* 成果亮点卡「看看」跳转（动态渲染，走委托） */
+document.addEventListener("click", function (e) {
+  var g = e.target.closest("[data-featgo]");
+  if (g) navTo(g.getAttribute("data-featgo"));
+});
 
 /* ===== 悬浮球分身与背景切换 ===== */
 (function () {
