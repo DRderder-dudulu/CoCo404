@@ -26,7 +26,7 @@
     --danger: #e06c6c;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  html { scroll-behavior: smooth; }
+  html { scroll-behavior: smooth; background: var(--bg); }
   body {
     position: relative;
     background:
@@ -301,7 +301,7 @@
   body.light .search-drop { box-shadow: 0 12px 30px rgba(30,40,60,.18); }
 
   /* ===== 自定义网页背景 ===== */
-  #bgLayer { position: fixed; inset: 0; z-index: -1; display: none; opacity: .7; filter: brightness(.85) saturate(.95); transition: opacity .45s ease, filter .45s ease; }
+  #bgLayer { position: fixed; left: 0; right: 0; top: -14vh; bottom: -14vh; z-index: -1; display: none; opacity: .7; filter: brightness(.85) saturate(.95); transition: opacity .45s ease, filter .45s ease; }
   body.has-bg #bgLayer { display: block; }
   body.light #bgLayer { opacity: .55; filter: brightness(1.06) saturate(1.03); }
   .bgl-img { position: absolute; inset: 0; background-size: cover; background-position: center center; background-repeat: no-repeat; opacity: 0; transition: opacity 1.2s ease; will-change: background-position, opacity; }
@@ -900,6 +900,13 @@
     box-shadow: 0 8px 26px rgba(0,0,0,.32), 0 0 14px rgba(139,123,255,.35); }
   body.light #toFb { box-shadow: 0 8px 20px rgba(30,40,60,.16); }
   @media (max-width: 640px) { #toFb { left: 14px; bottom: 14px; width: 42px; height: 42px; font-size: 17px; } }
+  /* 新版本提示浮条（版本自检） */
+  #updBar { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); z-index: 4000; display: flex; align-items: center; gap: 10px; max-width: 92vw; padding: 9px 14px; border-radius: 999px; background: rgba(14,15,20,.88); border: 1px solid var(--border); box-shadow: 0 10px 34px rgba(0,0,0,.5); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); font: 12px ui-monospace, SFMono-Regular, Consolas, monospace; color: var(--text); animation: updIn .35s ease; }
+  body.light #updBar { background: rgba(255,255,255,.94); box-shadow: 0 10px 30px rgba(30,40,60,.18); }
+  #updBar button { font: inherit; cursor: pointer; border-radius: 999px; padding: 4px 12px; border: 1px solid var(--accent); background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff; white-space: nowrap; }
+  #updBar #updNo { background: none; border: none; color: var(--muted); padding: 2px 6px; font-size: 13px; }
+  @keyframes updIn { from { opacity: 0; transform: translate(-50%, 10px); } to { opacity: 1; transform: translate(-50%, 0); } }
+  @media (max-width: 640px) { #updBar { bottom: 68px; } }
   .fb-flash { animation: fbFlash 1.1s ease; }
   @keyframes fbFlash { 0%, 100% { box-shadow: none; } 30% { box-shadow: 0 0 0 3px rgba(139,123,255,.55); } }
 /* ===== 站点技术入口条（成果页顶部）与三个独立展示页 ===== */
@@ -1588,7 +1595,36 @@
 */
 var LS_KEY = "lujiaxi_site_v1";
 var LS_BACKUP = "lujiaxi_site_v1_backup";   // 自动备份：主存档被清/损坏时可回滚
+var SITE_BUILD = "20260924-1800";   /* 版本戳：每次补丁/推送必更新（YYYYMMDD-HHMM），线上自检靠它发现新版 */
 var LS_ADMIN = "lujiaxi_admin_pass";
+/* ===== 版本自检（仅正式版）：发现新构建浮条提示一键更新，防手机缓存卡旧版 ===== */
+(function () {
+  if (location.hostname.indexOf("github.io") < 0) return;
+  setTimeout(function () {
+    fetch(location.pathname + "?chk=" + Date.now(), { cache: "no-store" })
+      .then(function (r) { return r.text(); })
+      .then(function (t) {
+        var m = t.match(/var SITE_BUILD = "(\d{8}-\d{4})"/);
+        if (!m || m[1] === SITE_BUILD) return;
+        try { if (localStorage.getItem("coco_upd_dismiss") === m[1]) return; } catch (e) {}
+        if ($("updBar")) return;
+        var bar = document.createElement("div");
+        bar.id = "updBar";
+        bar.innerHTML = '<span>' + T("发现新版本", "New version available") + '</span>'
+          + '<button type="button" id="updGo">' + T("点我更新", "Update") + '</button>'
+          + '<button type="button" id="updNo" aria-label="close">✕</button>';
+        document.body.appendChild(bar);
+        $("updGo").onclick = function () {
+          location.replace(location.origin + location.pathname + "?v=" + Date.now() + location.hash);
+        };
+        $("updNo").onclick = function () {
+          try { localStorage.setItem("coco_upd_dismiss", m[1]); } catch (e) {}
+          if (bar.parentNode) bar.parentNode.removeChild(bar);
+        };
+      })
+      .catch(function () {});
+  }, 9000);
+})();
 var LS_SESSION = "lujiaxi_admin_session";
 var LS_VID = "lujiaxi_vid";
 var DATA_SCHEMA = 2;                        // 数据结构版本号（只在结构大改时递增）
@@ -2039,25 +2075,28 @@ function snippetsPull() {
       renderBubbles();
     }).catch(function () {});
 }
-function adminInvoke(body, onOk, quiet) {
+function adminInvoke(body, onOk, quiet, passOverride, onFail) {
   if (!sbReady()) { if (!quiet) toast(T("后端未连接","Backend offline")); return; }
   var pass = "";
   try { pass = localStorage.getItem(LS_ADMIN) || ""; } catch (e) {}
+  if (passOverride != null) pass = passOverride;
   if (!pass) { if (!quiet) toast(T("未找到管理密码","Admin password missing")); return; }
   body.pass = pass;
   __sb.functions.invoke("fb-admin", { body: body }).then(function (r) {
     if (r.error || (r.data && !r.data.ok)) {
       var st = 0;
       try { st = (r.error && r.error.context && r.error.context.status) || 0; } catch (e) {}
+      if (r.data && r.data.error === "unauthorized" && !st) st = 401;
+      if (onFail) { onFail(st, r.data || {}); return; }
       if (!quiet) {
-        if (st === 401 || (r.data && r.data.error === "unauthorized"))
+        if (st === 401)
           toast(T("后端密钥与本地管理密码不一致，函数操作被拒绝","Backend secret mismatch — function rejected"));
         else toast(T("操作失败，请稍后再试","Failed, try later"));
       }
       return;
     }
     if (onOk) onOk(r.data || {});
-  }).catch(function () { if (!quiet) toast(T("操作失败，请稍后再试","Failed, try later")); });
+  }).catch(function () { if (onFail) { onFail(0, {}); return; } if (!quiet) toast(T("操作失败，请稍后再试","Failed, try later")); });
 }
 function chatAdminPull() {
   if (!am) return;
@@ -2265,24 +2304,46 @@ function renderAdminUI() {
 /* ================= 管理员验证 ================= */
 function openModal() {
   $("modalWrap").classList.add("show");
-  var hasPass = !!localStorage.getItem(LS_ADMIN);
-  if (hasPass) {
+  if (sbReady()) {   /* 云端模式：全设备唯一密码，本机不再自创 */
     $("modalTitle").textContent = T("管理员登录","Admin Login");
-    $("modalDesc").textContent = T("请输入管理员密码，进入管理模式。","Enter the admin password to enter admin mode.");
+    $("modalDesc").textContent = T("输入管理员密码（云端统一校验，任何设备一致）。","Enter the admin password (verified by server, same on every device).");
     $("modalFormMain").innerHTML = '<label>'+T("密码","Password")+'</label><input type="password" id="mPass1" placeholder="'+T("请输入密码","Enter password")+'">';
     $("modalFormConfirm").style.display = "none";
-  } else {
-    $("modalTitle").textContent = T("设置管理员密码","Set Admin Password");
-    $("modalDesc").textContent = T("首次使用，请设置一个只属于你的管理员密码（用于进入管理模式）。","First time: set your own admin password (used to enter admin mode).");
-    $("modalFormMain").innerHTML = '<label>'+T("设置密码","Set password")+'</label><input type="password" id="mPass1" placeholder="'+T("至少 4 位","At least 4 characters")+'">';
-    $("modalFormConfirm").style.display = "block";
-    $("mPass2").value = "";
+  } else {   /* 纯静态降级（未配置后端）：保留本机密码流程 */
+    var hasPass = !!localStorage.getItem(LS_ADMIN);
+    if (hasPass) {
+      $("modalTitle").textContent = T("管理员登录","Admin Login");
+      $("modalDesc").textContent = T("请输入管理员密码，进入管理模式。","Enter the admin password to enter admin mode.");
+      $("modalFormMain").innerHTML = '<label>'+T("密码","Password")+'</label><input type="password" id="mPass1" placeholder="'+T("请输入密码","Enter password")+'">';
+      $("modalFormConfirm").style.display = "none";
+    } else {
+      $("modalTitle").textContent = T("设置管理员密码","Set Admin Password");
+      $("modalDesc").textContent = T("首次使用，请设置一个只属于你的管理员密码（用于进入管理模式）。","First time: set your own admin password (used to enter admin mode).");
+      $("modalFormMain").innerHTML = '<label>'+T("设置密码","Set password")+'</label><input type="password" id="mPass1" placeholder="'+T("至少 4 位","At least 4 characters")+'">';
+      $("modalFormConfirm").style.display = "block";
+      $("mPass2").value = "";
+    }
   }
   setTimeout(function(){ $("mPass1").focus(); }, 50);
 }
 function closeModal(){ $("modalWrap").classList.remove("show"); }
 function modalGo() {
   var p1 = $("mPass1").value;
+  if (sbReady()) {   /* 云端校验：任何设备只有唯一密码能进 */
+    if (!p1) { toast(T("请输入密码","Enter password")); return; }
+    $("modalGo").disabled = true;
+    adminInvoke({ action: "verify" }, function () {
+      $("modalGo").disabled = false;
+      try { localStorage.setItem(LS_ADMIN, p1); } catch (e) {}
+      enterAdmin();
+    }, false, p1, function (st) {
+      $("modalGo").disabled = false;
+      if (st === 401) toast(T("密码不正确","Wrong password"));
+      else toast(T("无法连接服务器，请检查网络后重试","Cannot reach server, check network"));
+      $("mPass1").value = ""; $("mPass1").focus();
+    });
+    return;
+  }
   var hasPass = !!localStorage.getItem(LS_ADMIN);
   if (!hasPass) {
     var p2 = $("mPass2").value;
