@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="description" content="CoCo的个人主页" />
+<meta name="color-scheme" content="dark light">
 <title>CoCo · 个人主页</title>
 <!-- 数据文件（可选）：在管理模式里点「导出数据文件」生成 site-data.js，放到本文件同目录，
      站点就会优先读取它。这样即使版本更新、换浏览器或清空了浏览器数据，你的调整也不会丢。 -->
@@ -17,7 +18,7 @@
     --card-3: #20242c;
     --line: #2a2e36;
     --text: #e8eaf0;
-    --muted: #9aa0ab;
+    --muted: #aab2bf;
     --accent: #8b7bff;
     --accent-2: #5ad0ff;
     --ok: #6fbf8a;
@@ -282,7 +283,7 @@
   .sr-empty { padding: 12px 14px; font-size: 13px; color: var(--muted); }
 
   /* ===== 明亮主题（白天） ===== */
-  body.light { --bg:#f4f6fa; --card:#ffffff; --card-2:#edf0f6; --card-3:#e2e6f0; --line:#d6dbe6; --text:#1d2434; --muted:#5d6575; }
+  body.light { --bg:#f4f6fa; --card:#ffffff; --card-2:#edf0f6; --card-3:#e2e6f0; --line:#d6dbe6; --text:#1d2434; --muted:#525b6d; }
   body.light nav { background: rgba(255,255,255,.85); }
   body.light a { color: #2f7fc4; }
   body.light .badge { color: #5a4bd6; }
@@ -2888,7 +2889,7 @@ var STR = {
   tiL2: ["覆盖层：管理员「默认文本管理」逐条改文案", "Overlay: the admin default-texts panel edits copy key by key"],
   tiL3: ["回退：留空即回退默认，改动随数据备份一起走", "Fallback: empty means default; changes travel with data backups"],
   tiL4: ["零框架：原生 JS 字典查找，没有第三方 i18n 库", "Zero framework: plain JS dictionary lookups, no third-party i18n library"],
-  tiTry: ["试试：点导航栏右边的「中/EN」按钮，看这一页瞬间变语言。", "Try it: hit the 中/EN button in the nav and watch this page flip."]
+  tiTry: ["试试：点导航栏右边的「中/EN」按钮，看这一页瞬间变语言。", "Try it: hit the 中/EN button in the nav and watch this page flip."],
   adminTexts: ["管理员 · 默认文本", "ADMIN · Default texts"],
   textsHint: ["改全站写死的提示语 / 占位符 / 按钮字（中英各一份）。留空 = 恢复默认；改动随数据备份一起走。", "Edit the site's built-in labels, placeholders and button texts (CN + EN). Leave a field empty to use the default; changes travel with data backups."],
   adminTrash: ["管理员 · 回收站", "ADMIN · Trash"],
@@ -3600,7 +3601,7 @@ function sideWxText() {
   if (!wxState) { el.textContent = T("天气获取中…", "Loading weather…"); return; }
   if (wxState.fail) { el.textContent = T("天气数据获取失败", "Weather unavailable"); return; }
   var w = wxDesc(wxState.code);
-  el.textContent = T(SIDE_CITY.zh + " " + w[0] + " " + wxState.temp + "°", SIDE_CITY.en + " · " + w[1] + " " + wxState.temp + "°C");
+  el.textContent = (wxState.cached ? "≈ " : "") + T(SIDE_CITY.zh + " " + w[0] + " " + wxState.temp + "°", SIDE_CITY.en + " · " + w[1] + " " + wxState.temp + "°C");
 }
 function sideTick() {
   var d = new Date();
@@ -3619,18 +3620,39 @@ function sideTick() {
     : d.getFullYear() + " 年 " + pad2(d.getMonth() + 1) + " 月 " + pad2(d.getDate()) + " 日 " + WK_ZH[d.getDay()];
   sideWxText();
 }
-function sideFetchWx() {
+function wxCacheSave(w) {
+  try { localStorage.setItem("coco_wx_cache", JSON.stringify({ code: w.code, temp: w.temp, time: Date.now() })); } catch (e) {}
+}
+function wxCacheLoad() {   /* 6 小时内的缓存可用，弱网/手机端兜底 */
+  try {
+    var c = JSON.parse(localStorage.getItem("coco_wx_cache") || "null");
+    if (c && typeof c.temp === "number" && Date.now() - (c.time || 0) < 6 * 3600000) return c;
+  } catch (e) {}
+  return null;
+}
+function sideFetchWx(retried) {
   try {
     var ctl = new AbortController();
-    var to = setTimeout(function () { ctl.abort(); }, 6000);
+    var to = setTimeout(function () { ctl.abort(); }, 8000);   /* 手机弱网放宽到 8s */
     fetch("https://api.open-meteo.com/v1/forecast?latitude=" + SIDE_CITY.lat + "&longitude=" + SIDE_CITY.lon + "&current_weather=true", { signal: ctl.signal })
       .then(function (r) { return r.json(); })
       .then(function (j) {
         clearTimeout(to);
-        wxState = (j && j.current_weather) ? { code: j.current_weather.weathercode, temp: Math.round(j.current_weather.temperature) } : { fail: 1 };
+        if (j && j.current_weather) {
+          wxState = { code: j.current_weather.weathercode, temp: Math.round(j.current_weather.temperature) };
+          wxCacheSave(wxState);
+        } else {
+          throw 0;
+        }
         sideWxText();
       })
-      .catch(function () { clearTimeout(to); wxState = { fail: 1 }; sideWxText(); });
+      .catch(function () {
+        clearTimeout(to);
+        if (!retried) { setTimeout(function () { sideFetchWx(1); }, 3000); return; }   /* 3 秒后自动重试一次 */
+        var c = wxCacheLoad();
+        wxState = c ? { code: c.code, temp: c.temp, cached: 1 } : { fail: 1 };
+        sideWxText();
+      });
   } catch (e) { wxState = { fail: 1 }; sideWxText(); }
 }
 sideFetchWx();
