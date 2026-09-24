@@ -485,7 +485,7 @@
    仅细指针(鼠标)设备由 JS 启用；输入框内保留系统光标便于编辑。 */
   * { cursor: none; }
   input, textarea, select { cursor: auto; }
-  #neonCursor { position: fixed; left: 0; top: 0; width: 22px; height: 22px; border-radius: 50%;
+  #neonCursor { position: fixed; left: 0; top: 0; width: 16px; height: 16px; border-radius: 50%;
     border: 2px solid rgba(255,255,255,.92); background: transparent;
     box-shadow: 0 0 3px var(--accent), 0 0 12px var(--accent), inset 0 0 6px var(--accent);
     transform: translate3d(-100px, -100px, 0) translate(-50%, -50%);
@@ -493,7 +493,7 @@
                 width .18s ease, height .18s ease, opacity .25s ease;
     pointer-events: none; z-index: 10001; opacity: 0;
     animation: curGlow 2.6s ease-in-out infinite alternate; }
-  #neonCursor.big { width: 34px; height: 34px; }
+  #neonCursor.big { width: 24px; height: 24px; }
   body.cur-on #neonCursor { opacity: 1; }
   body.cur-on #neonCursor.gone { opacity: 0; }
   body.light #neonCursor { border-color: rgba(29,36,52,.55); }
@@ -656,7 +656,7 @@
   #page-home .arc-hero { background: none; border: none; border-radius: 0; padding: 4px 0 0; overflow: visible;
     display: flex; flex-wrap: wrap; align-items: flex-end; row-gap: 0; column-gap: 44px; }
   #page-home .arc-hero .lamp-wrap { width: 100%; }
-  #page-home .arc-meta { width: 100%; border: none; background: none; padding: 0; }
+  #page-home .arc-meta { width: 100%; border: none; background: none; padding: 0; justify-content: center; gap: 18px; }
   #page-home .arc-online { border: 1px solid var(--line); border-radius: 4px; padding: 6px 14px;
     background: color-mix(in srgb, var(--card) 55%, transparent); }
   #page-home .arc-file { width: 100%; margin-top: 36px; }
@@ -901,6 +901,15 @@
   @media (max-width: 640px) { #toFb { left: 14px; bottom: 14px; width: 42px; height: 42px; font-size: 17px; } }
   .fb-flash { animation: fbFlash 1.1s ease; }
   @keyframes fbFlash { 0%, 100% { box-shadow: none; } 30% { box-shadow: 0 0 0 3px rgba(139,123,255,.55); } }
+/* ===== 站点技术入口条（成果页顶部）与三个独立展示页 ===== */
+  .tech-strip { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 4px 0 16px; padding: 12px 14px; border: 1px dashed var(--line); border-radius: 12px; }
+  .tech-strip-label { font-size: 12.5px; color: var(--muted); margin-right: 4px; }
+  .tech-chip { display: inline-flex; align-items: center; gap: 8px; padding: 7px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--card-2); color: var(--text); font-size: 12.5px; cursor: pointer; font-family: inherit; transition: border-color .2s, transform .2s; }
+  .tech-chip:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .tech-chip .mono { font-family: Consolas, "Courier New", monospace; font-size: 11px; letter-spacing: 2px; color: var(--accent-2); }
+  .tech-list { list-style: none; margin: 14px 0; padding: 0; display: grid; gap: 8px; }
+  .tech-list li { padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px; background: rgba(255,255,255,.02); font-size: 13.5px; line-height: 1.7; }
+  body.light .tech-list li { background: rgba(20,26,38,.03); }
 /* ===== 成果 · 技术亮点卡（feat 类型条目；mono 档案签代替图标，零 emoji） ===== */
   .file .feat-ic { display: grid; place-items: center; height: 84px; background: #14171d;
     font-family: Consolas, "Courier New", monospace; font-size: 15px; letter-spacing: 3px; color: var(--accent-2); }
@@ -1403,6 +1412,12 @@
   <section class="page" id="page-works">
     <div class="section">
       <h2><span class="dot"></span><span data-i18n="worksTitle">🏆 我的成果</span></h2>
+      <div class="tech-strip">
+        <span class="tech-strip-label" data-i18n="techLabel">站点技术 · 这个站怎么做出来的，单独拉了三页 →</span>
+        <button class="tech-chip" data-techgo="dock"><span class="mono">DOCK</span><span data-i18n="techDock">悬浮球分身</span></button>
+        <button class="tech-chip" data-techgo="api"><span class="mono">API</span><span data-i18n="techApi">轻后端</span></button>
+        <button class="tech-chip" data-techgo="i18n"><span class="mono">I18N</span><span data-i18n="techI18n">双语系统</span></button>
+      </div>
       <div class="tabs">
         <button data-wtab="tt" class="active" data-i18n="tabTt">古怪的小东西</button>
         <button data-wtab="results" data-i18n="tabRs">成果</button>
@@ -1469,6 +1484,58 @@
       </div>
 
       <div id="repoList" style="margin-top:14px"></div>
+    </div>
+  </section>
+
+  <!-- ========== 站点技术展示页（从「我的成果」拉出的三项，各自独立成页） ========== -->
+  <section class="page" id="page-dock">
+    <div class="section">
+      <div class="sec-head"><span class="sec-no">TECH.01</span></div>
+      <h2><span class="dot"></span><span data-i18n="tdTitle">悬浮球分身 Dock</span></h2>
+      <div class="sec-sub" data-i18n="tdSub">DOCK · 右下角那颗蓝紫小球，全站的边角中枢</div>
+      <p class="note" data-i18n="tdDesc">一颗球收进三件事：天气粒子、背景切换、音乐播放。不用翻菜单，全在指尖。</p>
+      <ul class="tech-list">
+        <li data-i18n="tdL1">三模合一：粒子天气 · 背景图库 · 音乐播放，卫星按钮绕球排开</li>
+        <li data-i18n="tdL2">自由拖动：任意拖拽、贴边半隐、位置记忆，刷新不丢</li>
+        <li data-i18n="tdL3">悬停桥：纯 CSS 伪元素保住鼠标通路，面板随球自动翻转</li>
+        <li data-i18n="tdL4">荧光环：conic 渐变环 + 辉光脉冲，徽章流星同款工艺</li>
+      </ul>
+      <p class="note" data-i18n="tdTry">试试：拖动右下角的小球，单击它切换背景或放首歌。</p>
+      <p style="margin-top:14px"><button class="btn sm ghost" data-techgo="works" data-i18n="techBack">← 返回我的成果</button></p>
+    </div>
+  </section>
+
+  <section class="page" id="page-api">
+    <div class="section">
+      <div class="sec-head"><span class="sec-no">TECH.02</span></div>
+      <h2><span class="dot"></span><span data-i18n="taTitle">Supabase 轻后端</span></h2>
+      <div class="sec-sub" data-i18n="taSub">API · 意见箱与聊聊天背后的云服务</div>
+      <p class="note" data-i18n="taDesc">意见箱和聊天跑在 Supabase（Postgres + Edge Functions）上；后端没配置或断网时，整站自动降级为纯静态，照常能用。</p>
+      <ul class="tech-list">
+        <li data-i18n="taL1">数据库：Postgres 行级安全（RLS），访客只能读到自己的聊天线程</li>
+        <li data-i18n="taL2">防刷：限流触发器 per-IP 10 秒 + 服务器强制时间戳</li>
+        <li data-i18n="taL3">函数闸门：fb-admin Edge Function 密码鉴权，零导入 fetch 直连 REST</li>
+        <li data-i18n="taL4">优雅降级：后端未连接时，意见箱自动回落浏览器本地存储</li>
+      </ul>
+      <p class="note" data-i18n="taTry">试试：去主页 SEC.07 意见箱投一条，它会穿过这套后端到达我。</p>
+      <p style="margin-top:14px"><button class="btn sm ghost" data-techgo="works" data-i18n="techBack">← 返回我的成果</button></p>
+    </div>
+  </section>
+
+  <section class="page" id="page-i18n">
+    <div class="section">
+      <div class="sec-head"><span class="sec-no">TECH.03</span></div>
+      <h2><span class="dot"></span><span data-i18n="tiTitle">双语文本系统</span></h2>
+      <div class="sec-sub" data-i18n="tiSub">I18N · 全站中英一键切换</div>
+      <p class="note" data-i18n="tiDesc">全站中英文一键切换；连写死的提示语、占位符、按钮字都能在管理模式里在线覆盖。</p>
+      <ul class="tech-list">
+        <li data-i18n="tiL1">一键切换：导航栏「中/EN」，全站即时换语言</li>
+        <li data-i18n="tiL2">覆盖层：管理员「默认文本管理」逐条改文案</li>
+        <li data-i18n="tiL3">回退：留空即回退默认，改动随数据备份一起走</li>
+        <li data-i18n="tiL4">零框架：原生 JS 字典查找，没有第三方 i18n 库</li>
+      </ul>
+      <p class="note" data-i18n="tiTry">试试：点导航栏右边的「中/EN」按钮，看这一页瞬间变语言。</p>
+      <p style="margin-top:14px"><button class="btn sm ghost" data-techgo="works" data-i18n="techBack">← 返回我的成果</button></p>
     </div>
   </section>
 
@@ -1593,6 +1660,10 @@ function mergeStore(base, d) {
   ['visitors','publicAnon'].forEach(function(k){ if (d.chat && Array.isArray(d.chat[k])) out.chat[k] = d.chat[k]; });
   ['tt','results'].forEach(function(k){ if (d.works && Array.isArray(d.works[k])) out.works[k] = d.works[k]; });
   ['moments','feedback','links','qa'].forEach(function(k){ if (Array.isArray(d[k])) out[k] = d[k]; });
+  if (d.texts && typeof d.texts === "object" && !Array.isArray(d.texts)) out.texts = d.texts;
+  if (Array.isArray(d.trash)) out.trash = d.trash;
+  /* defaultStore 之外的字段（一次性种子标记等）原样保留，避免每次刷新被重置 */
+  Object.keys(d).forEach(function (k) { if (!(k in out)) out[k] = d[k]; });
   if (typeof d._savedAt === "number") out._savedAt = d._savedAt;
   out._schema = DATA_SCHEMA;
   return out;
@@ -1627,6 +1698,15 @@ var store = loadStore();
       go: "home", time: now }
   ].forEach(function (x) {
     if (!store.works.results.some(function (f) { return f.id === x.id; })) store.works.results.push(x);
+  });
+  saveStore();
+})();
+/* 一次性迁移：三张站点技术卡移出「我的成果」（已独立为 TECH.01~03 展示页，作品区留给用户自己的成果） */
+(function () {
+  if (store.worksSeedV3) return;
+  store.worksSeedV3 = 1;
+  ["feat-dock", "feat-api", "feat-i18n"].forEach(function (id) {
+    store.works.results = store.works.results.filter(function (f) { return f.id !== id; });
   });
   saveStore();
 })();
@@ -1673,7 +1753,7 @@ function visitorId(){
 var pgAnimT1 = null, pgAnimT2 = null;
 function route() {
   var h = (location.hash || "#home").replace("#","");
-  var pages = { home:1, contact:1, works:1, moments:1, repo:1 };
+  var pages = { home:1, contact:1, works:1, moments:1, repo:1, dock:1, api:1, i18n:1 };
   var next = pages[h] ? h : "home";
   document.querySelectorAll(".nav-links a").forEach(function(a){ a.classList.toggle("active", a.getAttribute("data-nav")===next); });
   if (next === curPage) {
@@ -1696,6 +1776,7 @@ function route() {
     document.querySelectorAll(".page").forEach(function(p){ p.classList.remove("active","pg-in","pg-out"); });
     newEl.classList.add("active");
     newEl.classList.add("pg-in");
+    window.scrollTo(0, 0);   /* 跳页后回到顶部 */
     pgAnimT2 = setTimeout(function(){ newEl.classList.remove("pg-in"); }, 700);
     render();
     return;
@@ -1706,6 +1787,7 @@ function route() {
     oldEl.classList.remove("active","pg-out");
     newEl.classList.add("active");
     newEl.classList.add("pg-in");
+    window.scrollTo(0, 0);   /* 跳页后回到顶部 */
     pgAnimT2 = setTimeout(function(){ newEl.classList.remove("pg-in"); }, 700);
     render();
   }, 160);
@@ -2296,22 +2378,23 @@ $("fbSend").addEventListener("click", function(){
   var t = $("fbInp").value.trim();
   if (!t) { toast(T("先写点建议再投递","Write a suggestion first")); return; }
   if (t.length > 1000) { t = t.slice(0, 1000); toast(T("太长啦，已截到 1000 字","Too long — trimmed to 1000 chars")); }
-  /* 防刷：同一浏览器 5 秒内只能投一条 */
+  /* 防刷：同一浏览器 12 秒内只能投一条（对齐后端 per-IP 10s 限流并留余量，避免前端放行后端拒收） */
   var now = Date.now(), last = 0;
   try { last = +(localStorage.getItem("coco_fb_last") || 0); } catch (e) {}
-  if (now - last < 5000) { toast(T("投得太快啦，歇几秒再投","Slow down — wait a few seconds")); return; }
+  if (now - last < 12000) { toast(T("投得太快啦，歇 12 秒再投","Slow down — wait about 12s")); return; }
   try { localStorage.setItem("coco_fb_last", String(now)); } catch (e) {}
   $("fbInp").value = "";
   var okMsg = T("已投递，感谢你的建议！","Sent — thanks for your feedback!");
   var fbMsg = T("投递失败，已暂存本地","Sync failed — kept locally");
-  var rlMsg = T("服务器限流啦，请 10 秒后再投","Server rate-limited — retry in 10s");
+  var rlMsg = T("服务器限流啦，内容已帮你保留，歇几秒再投","Server busy — your text was kept, retry in a few seconds");
   var dev = ($("fbDevice") && $("fbDevice").value) || "";
   function localSave() { store.feedback.push({ text: t, device: dev, time: Date.now() }); saveStore(); renderFb(); }
   if (sbReady()) {
     __sb.from(SB_TABLE).insert({ text: t, device: dev }).then(function (r) {
       if (r.error) {
         if (r.error.message && r.error.message.indexOf("rate_limited") >= 0) {
-          $("fbInp").value = t; /* 限流：把文字还给用户，稍后可再投 */
+          $("fbInp").value = t; /* 限流：把文字还给用户 */
+          try { localStorage.setItem("coco_fb_last", String(last)); } catch (e) {} /* 回滚冷却：没投成功不罚等 */
           toast(rlMsg);
         } else { localSave(); toast(fbMsg); }
       }
@@ -2777,6 +2860,35 @@ var STR = {
   repoAdd: ["添加网址", "Add link"],
   toTop: ["回到顶端", "Back to top"],
   toFb: ["去意见箱", "Go to feedback"],
+  techLabel: ["站点技术 · 这个站怎么做出来的，单独拉了三页 →", "Site tech · how this site is built, in three pages →"],
+  techDock: ["悬浮球分身", "Floating Dock"],
+  techApi: ["轻后端", "Mini Backend"],
+  techI18n: ["双语系统", "i18n System"],
+  techBack: ["← 返回我的成果", "← Back to Works"],
+  tdTitle: ["悬浮球分身 Dock", "Floating Dock"],
+  tdSub: ["DOCK · 右下角那颗蓝紫小球，全站的边角中枢", "DOCK · the little glowing ball at the corner"],
+  tdDesc: ["一颗球收进三件事：天气粒子、背景切换、音乐播放。不用翻菜单，全在指尖。", "One ball, three jobs: weather particles, background switching and the music player. No menus, all at your fingertips."],
+  tdL1: ["三模合一：粒子天气 · 背景图库 · 音乐播放，卫星按钮绕球排开", "3-in-1: particles, backgrounds and music fan out as satellite buttons"],
+  tdL2: ["自由拖动：任意拖拽、贴边半隐、位置记忆，刷新不丢", "Draggable: docks to edges half-hidden, remembers its spot across reloads"],
+  tdL3: ["悬停桥：纯 CSS 伪元素保住鼠标通路，面板随球自动翻转", "Hover bridge: pure-CSS pseudo elements keep the mouse path alive"],
+  tdL4: ["荧光环：conic 渐变环 + 辉光脉冲，徽章流星同款工艺", "Halo ring: conic gradient with pulsing glow, same craft as the badge meteors"],
+  tdTry: ["试试：拖动右下角的小球，单击它切换背景或放首歌。", "Try it: drag the ball at the bottom-right; click it to switch backgrounds or play a song."],
+  taTitle: ["Supabase 轻后端", "Supabase Mini Backend"],
+  taSub: ["API · 意见箱与聊聊天背后的云服务", "API · the cloud behind the feedback box and chat"],
+  taDesc: ["意见箱和聊天跑在 Supabase（Postgres + Edge Functions）上；后端没配置或断网时，整站自动降级为纯静态，照常能用。", "Feedback and chat run on Supabase (Postgres + Edge Functions); offline or unconfigured, the site degrades to pure static and keeps working."],
+  taL1: ["数据库：Postgres 行级安全（RLS），访客只能读到自己的聊天线程", "Database: Postgres row-level security — visitors only see their own threads"],
+  taL2: ["防刷：限流触发器 per-IP 10 秒 + 服务器强制时间戳", "Anti-spam: per-IP 10s rate-limit trigger + server-enforced timestamps"],
+  taL3: ["函数闸门：fb-admin Edge Function 密码鉴权，零导入 fetch 直连 REST", "Gate: fb-admin Edge Function with password auth, zero-import fetch-to-REST"],
+  taL4: ["优雅降级：后端未连接时，意见箱自动回落浏览器本地存储", "Graceful fallback: feedback drops to local storage when the backend is away"],
+  taTry: ["试试：去主页 SEC.07 意见箱投一条，它会穿过这套后端到达我。", "Try it: drop a note in SEC.07 on the home page — it travels this very pipeline to me."],
+  tiTitle: ["双语文本系统", "Bilingual Text System"],
+  tiSub: ["I18N · 全站中英一键切换", "I18N · one-click CN/EN switch"],
+  tiDesc: ["全站中英文一键切换；连写死的提示语、占位符、按钮字都能在管理模式里在线覆盖。", "One-click CN/EN switching across the site — even built-in labels and placeholders can be overridden in admin mode."],
+  tiL1: ["一键切换：导航栏「中/EN」，全站即时换语言", "One click: the 中/EN button in the nav re-renders everything"],
+  tiL2: ["覆盖层：管理员「默认文本管理」逐条改文案", "Overlay: the admin default-texts panel edits copy key by key"],
+  tiL3: ["回退：留空即回退默认，改动随数据备份一起走", "Fallback: empty means default; changes travel with data backups"],
+  tiL4: ["零框架：原生 JS 字典查找，没有第三方 i18n 库", "Zero framework: plain JS dictionary lookups, no third-party i18n library"],
+  tiTry: ["试试：点导航栏右边的「中/EN」按钮，看这一页瞬间变语言。", "Try it: hit the 中/EN button in the nav and watch this page flip."]
   adminTexts: ["管理员 · 默认文本", "ADMIN · Default texts"],
   textsHint: ["改全站写死的提示语 / 占位符 / 按钮字（中英各一份）。留空 = 恢复默认；改动随数据备份一起走。", "Edit the site's built-in labels, placeholders and button texts (CN + EN). Leave a field empty to use the default; changes travel with data backups."],
   adminTrash: ["管理员 · 回收站", "ADMIN · Trash"],
@@ -4274,10 +4386,12 @@ $("fxSave").addEventListener("click", function () {
     }, 80);
   });
 })();
-/* 成果亮点卡「看看」跳转（动态渲染，走委托） */
+/* 成果亮点卡「看看」跳转 + 站点技术入口条/返回钮跳转（走委托） */
 document.addEventListener("click", function (e) {
   var g = e.target.closest("[data-featgo]");
   if (g) navTo(g.getAttribute("data-featgo"));
+  var tg = e.target.closest("[data-techgo]");
+  if (tg) navTo(tg.getAttribute("data-techgo"));
 });
 
 /* ===== 悬浮球分身与背景切换 ===== */
