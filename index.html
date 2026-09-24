@@ -911,6 +911,11 @@
   .tech-list { list-style: none; margin: 14px 0; padding: 0; display: grid; gap: 8px; }
   .tech-list li { padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px; background: rgba(255,255,255,.02); font-size: 13.5px; line-height: 1.7; }
   body.light .tech-list li { background: rgba(20,26,38,.03); }
+/* ===== 意见箱 · 单线回复 ===== */
+  .fb-rp-view { margin-top: 8px; padding: 8px 10px; border-left: 3px solid var(--accent); background: rgba(139,123,255,.07); border-radius: 0 8px 8px 0; font-size: 13px; line-height: 1.6; }
+  .fb-rp-view b { color: var(--accent-2); }
+  .fb-rp-edit { display: flex; gap: 8px; margin-top: 8px; }
+  .fb-rp-edit input { flex: 1; background: var(--card-2); border: 1px solid var(--line); border-radius: 9px; color: var(--text); padding: 7px 10px; font-size: 13px; outline: none; font-family: inherit; }
 /* ===== 成果 · 技术亮点卡（feat 类型条目；mono 档案签代替图标，零 emoji） ===== */
   .file .feat-ic { display: grid; place-items: center; height: 84px; background: #14171d;
     font-family: Consolas, "Courier New", monospace; font-size: 15px; letter-spacing: 3px; color: var(--accent-2); }
@@ -1317,6 +1322,11 @@
           </select>
           <button class="btn" id="fbSend" data-i18n="fbSend">投递反馈</button>
         </div>
+      </div>
+      <div id="fbMineBox" style="margin-top:16px">
+        <div class="h3" style="font-size:14.5px;margin-top:0" data-i18n="fbMineTitle">📨 我的投递与回复</div>
+        <p class="note" style="margin:0 0 8px" data-i18n="fbMineHint">回复只显示在你投递时用的这台设备 / 浏览器上。</p>
+        <div id="fbMine"></div>
       </div>
       <div class="admin-panel" id="fbAdminPanel">
         <div class="admin-tag" data-i18n="fbAdmin">管理员 · 反馈管理</div>
@@ -1830,14 +1840,42 @@ function sbReady() {
   if (typeof supabase === "undefined") return false;
   try { __sb = supabase.createClient(SB_URL, SB_ANON, { global: { headers: { "x-vid": visitorId() } } }); return true; } catch (e) { return false; }
 }
+var __fbMine = [];
 function fbPull() {
   if (!sbReady()) return;
-  __sb.from(SB_TABLE).select("id,text,device,created_at").order("created_at", { ascending: false }).limit(300)
+  fbPullMine();
+  if (am) fbPullAdmin();
+}
+/* 访客：拉自己 vid 的反馈（含回复），RLS 按 x-vid 自动隔离，只能看到自己的 */
+function fbPullMine() {
+  if (!__sb) return;
+  __sb.from(SB_TABLE).select("id,text,reply,replied_at,created_at").order("created_at", { ascending: false }).limit(50)
     .then(function (r) {
-      if (r.error) { console.warn("fb pull:", r.error.message); return; }
-      __fbRemote = (r.data || []).map(function (x) { return { id: x.id, text: x.text, device: x.device || "", time: Date.parse(x.created_at) || Date.now() }; });
-      renderFb();
-    }).catch(function (e) { console.warn("fb pull failed:", e); });
+      if (r.error) { console.warn("fb mine:", r.error.message); return; }
+      __fbMine = r.data || [];
+      renderFbMine();
+    }).catch(function (e) { console.warn("fb mine failed:", e); });
+}
+/* 管理端：全量反馈改走密码函数（RLS 收紧后直接 select 只能看到管理员自己的） */
+function fbPullAdmin() {
+  adminInvoke({ action: "fb_all" }, function (d) {
+    __fbRemote = (d.rows || []).map(function (x) { return { id: x.id, text: x.text, device: x.device || "", reply: x.reply || "", time: Date.parse(x.created_at) || Date.now() }; });
+    renderFb();
+  }, true);
+}
+/* 访客侧「我的投递与回复」渲染 */
+function renderFbMine() {
+  var box = $("fbMine");
+  if (!box) return;
+  var rows = __fbMine || [];
+  if (!rows.length) { box.innerHTML = '<p class="muted">' + T("你在这台设备上还没有投递过反馈。", "No feedback from this device yet.") + '</p>'; return; }
+  box.innerHTML = rows.map(function (x) {
+    var rp = x.reply
+      ? '<div class="fb-rp-view"><b>' + T("CoCo 回复", "CoCo replied") + '</b>：' + esc(x.reply).replace(/\n/g, "<br>") + '</div>'
+      : '<div class="muted" style="font-size:12px;margin-top:6px">' + T("还没有回复，耐心等等～", "No reply yet — hang tight.") + '</div>';
+    return '<div class="tmsg visitor"><div class="txt">' + esc(x.text).replace(/\n/g, "<br>") +
+      '<div class="muted" style="font-size:11px">' + fmt(Date.parse(x.created_at) || Date.now()) + '</div>' + rp + '</div></div>';
+  }).join("");
 }
 
 /* ---- 意见箱 ---- */
@@ -1857,8 +1895,14 @@ function renderFb() {
     else if (am) delBtn = '<button class="btn sm ghost" data-delfbr="'+x.f.id+'" style="color:var(--danger)">'+T("删除","Delete")+'</button>';
     var devTag = x.f.device ? ' · ' + esc(x.f.device) : '';
     var locTag = x.remote ? '' : ' · ' + T("本地", "local");
+    var rpHtml = "";
+    if (x.remote && am) {
+      rpHtml = (x.f.reply ? '<div class="fb-rp-view"><b>'+T("我的回复","My reply")+'</b>：'+esc(x.f.reply).replace(/\n/g,"<br>")+'</div>' : '') +
+        '<div class="fb-rp-edit"><input type="text" id="fbRp_'+x.f.id+'" maxlength="1000" value="'+esc(x.f.reply||"")+'" placeholder="'+esc(T("写回复…（留空保存 = 清除回复）","Write a reply… (save empty = clear)"))+'">' +
+        '<button class="btn sm" data-fbreply="'+x.f.id+'">'+T("保存回复","Save reply")+'</button></div>';
+    }
     return '<div class="tmsg visitor"><div class="txt">'+esc(x.f.text).replace(/\n/g,"<br>")+
-      '<div class="muted" style="font-size:11px">'+fmt(x.f.time)+devTag+locTag+'</div></div>'+delBtn+'</div>';
+      '<div class="muted" style="font-size:11px">'+fmt(x.f.time)+devTag+locTag+'</div>'+rpHtml+'</div>'+delBtn+'</div>';
   }).join("");
 }
 
@@ -2233,7 +2277,7 @@ function modalGo() {
 }
 function enterAdmin(){
   am = true; sessionStorage.setItem(LS_SESSION,"1");
-  closeModal(); renderAdminUI(); renderChat(); renderThreads(); renderWorks(); renderMoments(); renderLinks(); chatAdminPull();
+  closeModal(); renderAdminUI(); renderChat(); renderThreads(); renderWorks(); renderMoments(); renderLinks(); chatAdminPull(); fbPull();
   toast(T("管理模式已开启","Admin mode on"));
 }
 function exitAdmin(){
@@ -2532,6 +2576,18 @@ document.addEventListener("click", function(e){
     store.moments = store.moments.filter(function(x){ return x.id!==mid; });
     saveStore(); renderMoments(); renderTrashPanel(); renderHomePreviews();
     toast(T("已删除，可在回收站复原","Deleted — restorable from Trash"));
+    return;
+  }
+
+  var frp = t.closest("[data-fbreply]");
+  if (frp) {
+    var rid = +frp.getAttribute("data-fbreply");
+    var rin = $("fbRp_" + rid);
+    var rval = rin ? rin.value.trim().slice(0, 1000) : "";
+    adminInvoke({ action: "fb_reply", id: rid, text: rval }, function (d) {
+      toast(d.cleared ? T("已清除回复","Reply cleared") : T("回复已保存，对方设备上可见","Reply saved — visible on their device"));
+      fbPullAdmin();
+    });
     return;
   }
 
@@ -2890,6 +2946,11 @@ var STR = {
   tiL3: ["回退：留空即回退默认，改动随数据备份一起走", "Fallback: empty means default; changes travel with data backups"],
   tiL4: ["零框架：原生 JS 字典查找，没有第三方 i18n 库", "Zero framework: plain JS dictionary lookups, no third-party i18n library"],
   tiTry: ["试试：点导航栏右边的「中/EN」按钮，看这一页瞬间变语言。", "Try it: hit the 中/EN button in the nav and watch this page flip."],
+  fbMineTitle: ["📨 我的投递与回复", "📨 My feedback & replies"],
+  fbMineHint: ["回复只显示在你投递时用的这台设备 / 浏览器上。", "Replies only show on the device / browser you submitted from."],
+  fbMineEmpty: ["你在这台设备上还没有投递过反馈。", "No feedback from this device yet."],
+  fbMineNoReply: ["还没有回复，耐心等等～", "No reply yet — hang tight."],
+  fbCoReply: ["CoCo 回复", "CoCo replied"],
   adminTexts: ["管理员 · 默认文本", "ADMIN · Default texts"],
   textsHint: ["改全站写死的提示语 / 占位符 / 按钮字（中英各一份）。留空 = 恢复默认；改动随数据备份一起走。", "Edit the site's built-in labels, placeholders and button texts (CN + EN). Leave a field empty to use the default; changes travel with data backups."],
   adminTrash: ["管理员 · 回收站", "ADMIN · Trash"],
@@ -4857,7 +4918,7 @@ window.addEventListener("load", function () {
   if (typeof sbReady === "function" && sbReady()) {
     fbPull(); chatPullMine(); snippetsPull(); chatAdminPull();
     setInterval(chatPullMine, 15000); /* 盯管理员回复 */
-    setInterval(function () { snippetsPull(); chatAdminPull(); }, 30000);
+    setInterval(function () { snippetsPull(); chatAdminPull(); fbPullMine(); }, 30000);
   }
 });
 </script>
