@@ -1721,6 +1721,26 @@ var store = loadStore();
   });
   saveStore();
 })();
+/* 一次性注入 V4：三张站点技术卡回归成果区（「看看」直达 TECH 独立展示页；先清后加防重复） */
+(function () {
+  if (store.worksSeedV4) return;
+  store.worksSeedV4 = 1;
+  var now = Date.now();
+  var ids = { "feat-dock": 1, "feat-api": 1, "feat-i18n": 1 };
+  store.works.results = store.works.results.filter(function (f) { return !ids[f.id]; });
+  store.works.results.push(
+    { id: "feat-dock", feat: true, tag: "DOCK", name: "悬浮球分身 Dock",
+      desc: "一球三用：粒子天气 / 背景切换 / 音乐播放三模合一。自由拖动、贴边半隐、位置记忆；纯 CSS「悬停桥」保住鼠标通路；荧光环 + 辉光脉冲沿用徽章流星同款 conic 工艺。",
+      go: "dock", time: now },
+    { id: "feat-api", feat: true, tag: "API", name: "Supabase 轻后端",
+      desc: "意见箱与聊聊天上云：Postgres 行级安全（访客只能看到自己的线程）、限流触发器防刷、Edge Function 密码闸门（零导入 fetch 直连 REST 版）；断网或未配置时自动降级本地存储。",
+      go: "api", time: now },
+    { id: "feat-i18n", feat: true, tag: "I18N", name: "双语文本系统",
+      desc: "全站中英一键切换；i18n 字典 + 管理员「默认文本」覆盖层——提示语、占位符、按钮字都能在线修改，留空即回退默认，改动随数据备份一起走。",
+      go: "i18n", time: now }
+  );
+  saveStore();
+})();
 /* 一次性注入：常用链接进仓库（公开；按 URL 去重；管理员可删，删后不复活） */
 (function () {
   if (store.linksSeedV1) return;
@@ -1861,7 +1881,7 @@ function fbPullAdmin() {
   adminInvoke({ action: "fb_all" }, function (d) {
     __fbRemote = (d.rows || []).map(function (x) { return { id: x.id, text: x.text, device: x.device || "", reply: x.reply || "", time: Date.parse(x.created_at) || Date.now() }; });
     renderFb();
-  }, true);
+  });
 }
 /* 访客侧「我的投递与回复」渲染 */
 function renderFbMine() {
@@ -3691,30 +3711,52 @@ function wxCacheLoad() {   /* 6 小时内的缓存可用，弱网/手机端兜�
   } catch (e) {}
   return null;
 }
+/* 双源兜底：open-meteo → wttr.in →（整链失败 3s 后重试一轮）→ 本地缓存 */
 function sideFetchWx(retried) {
+  wxTryProvider(0, function (w) {
+    if (w) { wxState = w; wxCacheSave(w); sideWxText(); return; }
+    if (!retried) { setTimeout(function () { sideFetchWx(1); }, 3000); return; }
+    var c = wxCacheLoad();
+    wxState = c ? { code: c.code, temp: c.temp, cached: 1 } : { fail: 1 };
+    sideWxText();
+  });
+}
+function wxTryProvider(idx, done) {
+  var url = idx === 0
+    ? "https://api.open-meteo.com/v1/forecast?latitude=" + SIDE_CITY.lat + "&longitude=" + SIDE_CITY.lon + "&current_weather=true"
+    : idx === 1
+      ? "https://wttr.in/~" + SIDE_CITY.lat + "+" + SIDE_CITY.lon + "?format=j1"
+      : null;
+  if (!url) { done(null); return; }
   try {
     var ctl = new AbortController();
-    var to = setTimeout(function () { ctl.abort(); }, 8000);   /* 手机弱网放宽到 8s */
-    fetch("https://api.open-meteo.com/v1/forecast?latitude=" + SIDE_CITY.lat + "&longitude=" + SIDE_CITY.lon + "&current_weather=true", { signal: ctl.signal })
+    var to = setTimeout(function () { ctl.abort(); }, 8000);
+    fetch(url, { signal: ctl.signal })
       .then(function (r) { return r.json(); })
       .then(function (j) {
         clearTimeout(to);
-        if (j && j.current_weather) {
-          wxState = { code: j.current_weather.weathercode, temp: Math.round(j.current_weather.temperature) };
-          wxCacheSave(wxState);
+        var w = null;
+        if (idx === 0) {
+          if (j && j.current_weather) w = { code: j.current_weather.weathercode, temp: Math.round(j.current_weather.temperature) };
         } else {
-          throw 0;
+          var cc = j && j.current_condition && j.current_condition[0];
+          if (cc && cc.temp_C != null) w = { code: wxWttrCode(cc.weatherCode), temp: Math.round(+cc.temp_C) };
         }
-        sideWxText();
+        if (w) done(w); else wxTryProvider(idx + 1, done);
       })
-      .catch(function () {
-        clearTimeout(to);
-        if (!retried) { setTimeout(function () { sideFetchWx(1); }, 3000); return; }   /* 3 秒后自动重试一次 */
-        var c = wxCacheLoad();
-        wxState = c ? { code: c.code, temp: c.temp, cached: 1 } : { fail: 1 };
-        sideWxText();
-      });
-  } catch (e) { wxState = { fail: 1 }; sideWxText(); }
+      .catch(function () { clearTimeout(to); wxTryProvider(idx + 1, done); });
+  } catch (e) { wxTryProvider(idx + 1, done); }
+}
+function wxWttrCode(c) {   /* wttr.in 天气码 → 本站 wxDesc 用的 WMO 风格码（粗粒度映射） */
+  c = +c || 0;
+  if (c === 113) return 0;    /* 晴 */
+  if (c === 116) return 2;    /* 多云 */
+  if (c === 119 || c === 122) return 3;    /* 阴 */
+  if (c === 143 || c === 248 || c === 260) return 45;   /* 雾 */
+  if (c === 200 || c === 386 || c === 389 || c === 392 || c === 395) return 95;   /* 雷雨 */
+  if (c === 179 || c === 182 || c === 227 || c === 230 || (c >= 323 && c <= 338) || c === 350 || c === 362 || c === 365 || c === 368 || c === 371 || c === 374 || c === 377) return 73;   /* 雪 */
+  if ((c >= 299 && c <= 308) || c === 353 || c === 356 || c === 359) return 63;   /* 雨 */
+  return 51;   /* 毛毛雨/轻雨及其余 */
 }
 sideFetchWx();
 setInterval(sideFetchWx, 1800000);
