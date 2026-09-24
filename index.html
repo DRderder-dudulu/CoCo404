@@ -26,7 +26,7 @@
     --danger: #e06c6c;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  html { scroll-behavior: smooth; background: var(--bg); }
+  html { scroll-behavior: smooth; } /* 切勿给 html 加 background：会截断 body 背景向画布传播，body 的不透明背景会把 z-index:-1 的 #bgLayer 背景图整个盖住（patch_home57 踩过此坑） */
   body {
     position: relative;
     background:
@@ -1595,7 +1595,7 @@
 */
 var LS_KEY = "lujiaxi_site_v1";
 var LS_BACKUP = "lujiaxi_site_v1_backup";   // 自动备份：主存档被清/损坏时可回滚
-var SITE_BUILD = "20260924-1800";   /* 版本戳：每次补丁/推送必更新（YYYYMMDD-HHMM），线上自检靠它发现新版 */
+var SITE_BUILD = "20260924-1807";   /* 版本戳：每次补丁/推送必更新（YYYYMMDD-HHMM），线上自检靠它发现新版 */
 var LS_ADMIN = "lujiaxi_admin_pass";
 /* ===== 版本自检（仅正式版）：发现新构建浮条提示一键更新，防手机缓存卡旧版 ===== */
 (function () {
