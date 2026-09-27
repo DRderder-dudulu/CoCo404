@@ -1595,7 +1595,7 @@
 */
 var LS_KEY = "lujiaxi_site_v1";
 var LS_BACKUP = "lujiaxi_site_v1_backup";   // 自动备份：主存档被清/损坏时可回滚
-var SITE_BUILD = "20260924-1807";   /* 版本戳：每次补丁/推送必更新（YYYYMMDD-HHMM），线上自检靠它发现新版 */
+var SITE_BUILD = "20260927-1753";   /* 版本戳：每次补丁/推送必更新（YYYYMMDD-HHMM），线上自检靠它发现新版 */
 var LS_ADMIN = "lujiaxi_admin_pass";
 /* ===== 版本自检（仅正式版）：发现新构建浮条提示一键更新，防手机缓存卡旧版 ===== */
 (function () {
@@ -3557,6 +3557,23 @@ function bgSeed(){
   bgListSave(list);
 }
 
+/* ---- 第二批内置背景（用户供图固化进仓库，全设备可用）：独立种子标记，不复活第一批里被删除的图 ---- */
+var LS_BGSEED2 = "lujiaxi_bg_seeded2_v1";
+var BG_SEED2 = ["bg/bg08.jpg","bg/bg09.jpg","bg/bg10.jpg","bg/bg11.jpg","bg/bg12.jpg","bg/bg13.jpg","bg/bg14.jpg"];
+function bgSeed2(){
+  var done = null;
+  try { done = localStorage.getItem(LS_BGSEED2); } catch(e){}
+  if (done) return;
+  try { localStorage.setItem(LS_BGSEED2, "1"); } catch(e){}
+  var list = bgListGet();
+  var have = {};
+  list.forEach(function(it){ if (it.url) have[it.url] = 1; });
+  BG_SEED2.forEach(function(u, i){
+    if (!have[u]) list.push({ id: "seed2_" + i, kind: "url", url: u });
+  });
+  bgListSave(list);
+}
+
 /* ---- 添加（多选文件 / 图片链接，上限 25 张） ---- */
 $("bgApply").addEventListener("click", function(){
   if (!am) { toast(T("请先进入管理模式", "Enter admin mode first")); return; }
@@ -5013,6 +5030,7 @@ applyTheme();
 applyLang();
 bgMigrate();
 bgSeed();
+bgSeed2();
 renderBgThumbs();
 applyBg();
 if (window.bgSolidApply) window.bgSolidApply();
